@@ -9,7 +9,7 @@ def makeSale():
     ticketID = dateString + str(counter)
     receiptString = ""
     while True:
-        inputID = input("Scan item or input item ID. Hit enter to end sale." )
+        inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
         if inputID == "":
             break
         else:
