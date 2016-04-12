@@ -21,26 +21,26 @@ class connectTools:
 
 
     def makeSale():
-    global counter
-    counter += 1
-    ticketID = dateString + str(counter)
-    receiptString = ""
-    while True:
-        inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
-        if inputID == "":
-            break
-        else:
-            pass
+        global counter
+        counter += 1
+        ticketID = dateString + str(counter)
+        receiptString = ""
+        while True:
+            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
+            if inputID == "":
+                break
+            else:
+                pass
             #connect to the database
             #check item exixts
             #retrieve item name and price
             #add to receiptString
     #submit to sales db
     #decrement inventory
-    print(ticketID)
-    print("Thanks for shopping at My Tool!")
-    print("Have a great day!")
-    print(receiptString)
+        print(ticketID)
+        print("Thanks for shopping at My Tool!")
+        print("Have a great day!")
+        print(receiptString)
     
     def connect():
         try:
@@ -113,9 +113,9 @@ class connectTools:
         except:
             print("Sorry, I could not add this item")
 
-    def generate_id():
+  #  def generate_id():
         
-        return current
+   #     return current
 
 def main():
     arguing = "supplier = 'MY TOOL INC'"
@@ -128,6 +128,6 @@ def main():
 ##    connectTools.query_single(table_name, column_name, arguing)
 ##    connectTools.add_item(list1)
     connectTools.disconnect()
-    time = connectTools.generate_id():
+   # time = connectTools.generate_id()
 if __name__ == '__main__':
     main()
