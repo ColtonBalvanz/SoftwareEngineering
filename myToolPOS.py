@@ -16,31 +16,7 @@ class connectTools:
     server_info = None
     url = None
     cursor = None
-    counter = 0
-    dateString = str(time.strftime("%Y%m%d"))
 
-
-    def makeSale():
-        global counter
-        counter += 1
-        ticketID = dateString + str(counter)
-        receiptString = ""
-        while True:
-            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
-            if inputID == "":
-                break
-            else:
-                pass
-            #connect to the database
-            #check item exixts
-            #retrieve item name and price
-            #add to receiptString
-    #submit to sales db
-    #decrement inventory
-        print(ticketID)
-        print("Thanks for shopping at My Tool!")
-        print("Have a great day!")
-        print(receiptString)
     
     def connect():
         try:
@@ -79,11 +55,11 @@ class connectTools:
         records = cursor.fetchall()
         pprint.pprint(records)
 
-    def modify_single(table, row_args, args):
+    def modify_single(table, operation, location):
         global conn
         global cursor
         try:
-            cursor.execute("""UPDATE ONLY %(table)s SET %(row)s WHERE %(args)s;""", {"table": AsIs(table), "args": AsIs(args), "row": AsIs(row_args)})
+            cursor.execute("""UPDATE ONLY %(table)s SET %(operation)s WHERE %(location)s;""", {"table": AsIs(table), "location": AsIs(location), "operation": AsIs(operation)})
             conn.commit()
         except:
             print("Sorry, I was unable to modify with that statement")
@@ -113,21 +89,49 @@ class connectTools:
         except:
             print("Sorry, I could not add this item")
 
-  #  def generate_id():
-        
-   #     return current
+class saleOperations
+
+    counter = 0
+    dateString = str(time.strftime("%Y%m%d"))
+
+    def makeSale():
+        global counter
+        counter += 1
+        ticketID = dateString + str(counter)
+        receiptString = ""
+        while True:
+            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
+            if inputID == "":
+                break
+            else:
+                pass
+            #connect to the database
+            #check item exists
+            #retrieve item name and price
+            #add to receiptString
+    #submit to sales db
+    #decrement inventory
+        print(ticketID)
+        print("Thanks for shopping at My Tool!")
+        print("Have a great day!")
+        print(receiptString)
+
+    def decrement(subtract):
+        sqlstring = "quantity = quantity - " + subtract
+        return sqlstring
 
 def main():
-    arguing = "supplier = 'MY TOOL INC'"
-    rowargs = "quantity = quantity + 9"
+    location = "supplier = 'MY TOOL INC'"
+    operation = saleOperations.decrement(5)
     column_name = "*"
     table_name = "inventory"
     list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
     connectTools.connect()
-    connectTools.query(table_name, column_name)   
+    connectTools.modify_single(table_name, operation, location)
+##    connectTools.query(table_name, column_name)   
 ##    connectTools.query_single(table_name, column_name, arguing)
 ##    connectTools.add_item(list1)
     connectTools.disconnect()
-   # time = connectTools.generate_id()
+    time = makeSale.generate_id()
 if __name__ == '__main__':
     main()
