@@ -115,9 +115,12 @@ class connectTools:
         
 
     def add_item(table, row):
-##add_item will add a new item to the database. It will add whatever new
-##item My Tool chooses to carry in the store.
-        
+##add_item will add a new item to the inventory database. It will add
+##whatever new item My Tool chooses to carry in the store. It takes the
+##arguement of the table name and the values of that new row, which are
+##the item_id, the quantity, category of the item, price, cost, how many
+##to keep in stock regularly, whether the item is on sale or not, the
+##sale start and end dates, the sale price, and who supplies that item.
 
         global conn
         global cursor
@@ -168,15 +171,19 @@ class saleOperations:
 ##decrement() changes the quantity of an item in a database. There is
 ##not much important about this yet.
         sqlstring = "quantity = quantity - " + subtract
-        return sqlstring
+        return AsIs(sqlstring)
+    def increment(add):
+##increment() changes the quanity of an item in a database.
+        sqlstring = "quantity = quantity + " + add
+        return AsIs(sqlstring)
 
 def main():
 ##This probably won't be here for too long. Once we have a GUI we will
 ##have a more functional main() to operate out sale system.
 
     
-    location = "supplier = 'MY TOOL INC'"
-    operation = saleOperations.decrement(5)
+    location = "item_id = 12000151200"
+    operation = saleOperations.increment('5')
     column_name = "*"
     table_name = "inventory"
     list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
@@ -186,7 +193,7 @@ def main():
 ##    connectTools.query_single(table_name, column_name, arguing)
 ##    connectTools.add_item(list1)
     connectTools.disconnect()
-    time = makeSale.generate_id()
+##    time = makeSale.generate_id()
 
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
