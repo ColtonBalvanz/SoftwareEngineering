@@ -10,6 +10,8 @@ import time
 ##      global upccode
 
 
+counter = 0
+dateString = str(time.strftime("%Y%m%d"))
 
 class connectTools:
 ##These are some of the variables that will be reused often throughout
@@ -132,20 +134,12 @@ class connectTools:
         except:
             print("Sorry, I could not add this item")
 
-class salesOperations:
-##This new class will outline a different set of responsibilities more
-##abstract from the server. These methods will look more familiar to the
-##end user, but they will ultimately work with methods from the connection class.
-
-    counter = 0
-    dateString = str(time.strftime("%Y%m%d"))
-
     def makeSale():
 ##The makeSale() method is responsible for producing the sale of a
 ##customer. It will also print out a physical receipt the customer can
 ##take with them.
-        
         global counter
+        global dateString
         counter += 1
         ticketID = dateString + str(counter)
         receiptString = ""
@@ -189,7 +183,7 @@ def main():
 
     
     location = "item_id = 12000151200"
-    operation = saleOperations.increment('5')
+    operation = connectTools.increment('5')
     column_name = "*"
     table_name = "inventory"
     list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
@@ -200,7 +194,7 @@ def main():
 ##    connectTools.add_item(list1)
     connectTools.disconnect()
 ##    time = makeSale.generate_id()
-    salesOperations.makeSale()
+    connectTools.makeSale()
 
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
