@@ -132,7 +132,7 @@ class connectTools:
         except:
             print("Sorry, I could not add this item")
 
-class saleOperations:
+class salesOperations:
 ##This new class will outline a different set of responsibilities more
 ##abstract from the server. These methods will look more familiar to the
 ##end user, but they will ultimately work with methods from the connection class.
