@@ -80,8 +80,7 @@ class connectTools:
         
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
-        records = cursor.fetchall()
-        pprint.pprint(records)
+        return cursor.fetchone()
 
     def modify_single(table, operation, location):
 ##modify_single will do the work of subtracting a number of items from a
@@ -144,15 +143,16 @@ class connectTools:
         ticketID = dateString + str(counter)
         receiptString = ""
         while True:
-            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
+            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale. ")
             if inputID == "":
                 break
             else:
-                item = connectTools.query_single("inventory", "*", "item_id = " + AsIs(inputID))
+                item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
                 if item != None:
-                    print(item)      
-            ##
-            ##
+                    itemName = item[11]
+                    price = item[3]
+                    print(itemName, price)
+
             #retrieve item name and price
             #add to receiptString
     #submit to sales db
@@ -194,9 +194,10 @@ def main():
 ##    connectTools.query(table_name, column_name)   
 ##    connectTools.query_single(table_name, column_name, arguing)
 ##    connectTools.add_item(list1)
+    connectTools.makeSale()
     connectTools.disconnect()
 ##    time = makeSale.generate_id()
-    connectTools.makeSale()
+##    connectTools.makeSale()
 
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
