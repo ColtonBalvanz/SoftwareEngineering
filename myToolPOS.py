@@ -108,10 +108,6 @@ class connectTools:
             conn.commit()
         except:
             print("Sorry, that was not a valid entry")
-
-    def increment(add):
-        sqlstring = "quantity = quantity + " + add
-        return sqlstring
         
 
     def add_item(table, row):
@@ -182,6 +178,10 @@ class saleOperations:
 
 ##    def login(user_name, password):
 
+
+    def increment(add):
+        sqlstring = "quantity = quantity + " + add
+        return sqlstring
 
 def main():
 ##This probably won't be here for too long. Once we have a GUI we will
