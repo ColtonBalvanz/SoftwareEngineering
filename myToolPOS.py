@@ -148,8 +148,10 @@ class connectTools:
             if inputID == "":
                 break
             else:
-                pass
-            ##if connectTools.query_single("inventory", "item_id", "item_id = ?????????????") =! None
+                item = connectTools.query_single("inventory", "*", "item_id = " + AsIs(inputID))
+                if item != None:
+                    print(item)      
+            ##
             ##
             #retrieve item name and price
             #add to receiptString
