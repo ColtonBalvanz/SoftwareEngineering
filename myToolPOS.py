@@ -155,8 +155,8 @@ class saleOperations:
                 break
             else:
                 pass
-            ##connectTools.query_single()
-            #check item exists
+            ##if connectTools.query_single("inventory", "item_id", "item_id = ?????????????") =! None
+            ##
             #retrieve item name and price
             #add to receiptString
     #submit to sales db
@@ -177,6 +177,12 @@ class saleOperations:
         sqlstring = "quantity = quantity + " + add
         return AsIs(sqlstring)
 
+
+##class loginAccess:
+
+##    def login(user_name, password):
+
+
 def main():
 ##This probably won't be here for too long. Once we have a GUI we will
 ##have a more functional main() to operate out sale system.
@@ -194,6 +200,7 @@ def main():
 ##    connectTools.add_item(list1)
     connectTools.disconnect()
 ##    time = makeSale.generate_id()
+    salesOperations.makeSale()
 
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
