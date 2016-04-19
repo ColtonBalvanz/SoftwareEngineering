@@ -6,7 +6,7 @@ import urllib.parse
 import time
 ##from tkinter import Tk, Frame, Button, BOTH, Label
 ##import time
-
+##This is the new version!!!
 
 ## class GUI
 ##      global upccode
