@@ -4,6 +4,8 @@ import psycopg2
 from psycopg2.extensions import AsIs
 import urllib.parse
 import time
+##from tkinter import Tk, Frame, Button, BOTH, Label
+##import time
 
 
 ## class GUI
@@ -12,6 +14,9 @@ import time
 
 counter = 0
 dateString = str(time.strftime("%Y%m%d"))
+
+##Try not to get too excited about this. I copied and pasted from the
+
 
 class connectTools:
 ##These are some of the variables that will be reused often throughout
