@@ -16,6 +16,42 @@ counter = 0
 dateString = str(time.strftime("%Y%m%d"))
 
 ##Try not to get too excited about this. I copied and pasted from the
+##GUI program I was working with to try out tkinter. :p Hopefully here
+##is where we link up the buttons. Clock works, quit should still work.
+##
+##class GUI(Frame):
+##  
+##    def __init__(self, parent):
+##        Frame.__init__(self, parent, background="grey")   
+##        self.parent = parent
+##        self.initUI()
+##        self.update_clock()
+##
+##    def update_clock(self):
+##        current = time.strftime("%I:%M:%S%p %B %d, %Y")
+##        someClock = Label(self, text=current, font=(10), padx=50)
+##        someClock.place(x=0, y=80)
+##        self.after(1000, self.update_clock)
+##
+##    def quit():
+##        global root
+##        root.quit()
+##        
+##    
+##    def initUI(self):
+##      
+##        self.parent.title("My Tool Client")
+##        self.pack(fill=BOTH, expand=1)
+##        quitButton = Button(self, text="Exit",
+##            command=quit, padx=50, pady=30)
+##        quitButton.place(x=674, y=0)
+##        adminButton = Button(self, text="Void Item(s)", padx=28, pady=30)
+##        adminButton.place(x=674, y=84)
+##        myToolLabel = Label(self, text="Welcome to MyTool!", font=("-weight bold", 24), padx=20)
+##        employeeName = Label(self, text="Bob", padx=119)
+##        myToolLabel.place(x=0, y=0)
+##        employeeName.place(x=0, y=42)
+
 
 
 class connectTools:
@@ -54,8 +90,9 @@ class connectTools:
             )
             global cursor
             cursor = conn.cursor()
+            return True
         except:
-            print("Sorry, I am unable to connect to the database")
+            return False
 
     def disconnect():
 ##This is called after connect(), and it should not be called before
@@ -75,8 +112,7 @@ class connectTools:
 
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s""", {"table": AsIs(table), "column": AsIs(column)})
-        records = cursor.fetchall()
-        pprint.pprint(records)
+        return cursor.fetchall()
 
     def query_single(table, column, args):
 ##This is helpful for when we want to look up an item more specifically.
@@ -85,8 +121,7 @@ class connectTools:
         
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
-        records = cursor.fetchall()
-        pprint.pprint(records)
+        return cursor.fetchone()
 
     def modify_single(table, operation, location):
 ##modify_single will do the work of subtracting a number of items from a
@@ -98,9 +133,10 @@ class connectTools:
         try:
             cursor.execute("""UPDATE ONLY %(table)s SET %(operation)s WHERE %(location)s;""", {"table": AsIs(table), "location": AsIs(location), "operation": AsIs(operation)})
             conn.commit()
+            return True
         except:
             print("Sorry, I was unable to modify with that statement")
-            
+            return False
             
     def add_sale(row):
 ##add_sale has the responsibility to add a row in the sales table, and
@@ -113,8 +149,10 @@ class connectTools:
                 """INSERT INTO sales (sale_id, items_purchased, item_prices)
     VALUES (%s, %s, %s);""", row)
             conn.commit()
+            return True
         except:
             print("Sorry, that was not a valid entry")
+            return False
 
     def increment(add):
         sqlstring = "quantity = quantity + " + add
@@ -136,8 +174,10 @@ class connectTools:
             """INSERT INTO inventory (item_id, quantity, category, price, cost, desired_quantity, sale, sale_start, sale_end, sale_price, supplier)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", row)
             conn.commit()
+            return True
         except:
             print("Sorry, I could not add this item")
+            return False
 
     def makeSale():
 ##The makeSale() method is responsible for producing the sale of a
@@ -192,15 +232,16 @@ def main():
     column_name = "*"
     table_name = "inventory"
     list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
-    connectTools.connect()
-    connectTools.modify_single(table_name, operation, location)
-##    connectTools.query(table_name, column_name)   
-##    connectTools.query_single(table_name, column_name, arguing)
-##    connectTools.add_item(list1)
-    connectTools.disconnect()
+    
+    if connectTools.connect()==True:
+        print("The connection was a success!")
+##        print(connectTools.query(table_name, column_name))
+        connectTools.makeSale()
+        connectTools.disconnect()
+    else:
+        print("Whoops! I can't even!")
+        exit()
 ##    time = makeSale.generate_id()
-    connectTools.makeSale()
-
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
     main()
