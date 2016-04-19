@@ -189,12 +189,15 @@ class connectTools:
         ticketID = dateString + str(counter)
         receiptString = ""
         while True:
-            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
+            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale. " )
             if inputID == "":
                 break
             else:
-                pass
-            ##if connectTools.query_single("inventory", "item_id", "item_id = ?????????????") =! None
+                item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
+                if item != None:
+                    itemName = item[11]
+                    itemPrice = item[3]
+                    print(itemName, itemPrice)
             ##
             #retrieve item name and price
             #add to receiptString
