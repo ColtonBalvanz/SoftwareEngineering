@@ -8,7 +8,7 @@ root.wm_title("Main") #title of window
 root.resizable(width=FALSE,height=FALSE) #Makes the window nonexpandable
 
 myLabel = Label(root,text="My Tool",font="Helvetica 25 bold").pack()
-myLabel.place(relx=.2,rely=.1)
+#myLabel.place(relx=.2,rely=.1)
 
 def done():
     """Exits the window when 'Exit' button is pressed"""
