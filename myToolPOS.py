@@ -4,6 +4,7 @@ import psycopg2
 from psycopg2.extensions import AsIs
 import urllib.parse
 import time
+import xlwt
 ##from tkinter import Tk, Frame, Button, BOTH, Label
 ##import time
 ##This is the new version!!!
@@ -14,6 +15,10 @@ import time
 
 counter = 0
 dateString = str(time.strftime("%Y%m%d"))
+BOLD_CELLS = xlwt.easyxf('font: bold on')
+DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
+GENERATE_WORTH_NAME = "Worth_report_" + str(time.strftime("%m-%d-%Y"))
+
 
 ##Try not to get too excited about this. I copied and pasted from the
 ##GUI program I was working with to try out tkinter. :p Hopefully here
