@@ -128,6 +128,11 @@ class connectTools:
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
         return cursor.fetchone()
 
+    def query_column_names(table):
+        global cursor
+        cursor.execute("SELECT * FROM  information_schema.tables WHERE table_schema = 'schema_name' AND table_name = 'inventory'")
+        print(cursor.fetchall())
+
     def modify_single(table, operation, location):
 ##modify_single will do the work of subtracting a number of items from a
 ##purchase, plus any updates we might have on updating a specific item,
@@ -245,6 +250,7 @@ def main():
         print("The connection was a success!")
 ##        print(connectTools.query(table_name, column_name))
         connectTools.makeSale()
+        connectTools.query_column_names("inventory")
         connectTools.disconnect()
     else:
         print("Whoops! I can't even!")
