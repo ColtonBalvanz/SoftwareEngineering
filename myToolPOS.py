@@ -18,6 +18,8 @@ dateString = str(time.strftime("%Y%m%d"))
 BOLD_CELLS = xlwt.easyxf('font: bold on')
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_report_" + str(time.strftime("%m-%d-%Y"))
+GENERATE_DAILY_OPERATIONS_NAME = "Daily_Operations_Report" \
++ str(time.strftime("%m-%d-%Y"))
 
 
 ##Try not to get too excited about this. I copied and pasted from the
@@ -253,3 +255,4 @@ def main():
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
     main()
+##def report():
