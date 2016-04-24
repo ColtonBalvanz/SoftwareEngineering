@@ -23,9 +23,6 @@ voidItem = Button(root,text="Void Item",width=18,height=5,bg="#c2d6d6")
 voidItem.place(relx=.91,rely=.59,anchor="c")
 payNow = Button(root,text="Pay Now!",width=18,height=10,bg="#00ff00")
 payNow.place(relx=.91,rely=.835,anchor="c")
-
-<<<<<<< HEAD
-=======
 text = Text(root, width=14, height=8,font="Helvetica 25 bold")
 text.insert('2.0', 'My Tool\n')
 text.insert('4.0', "Cashier Mode")
@@ -38,7 +35,6 @@ UPCLabel.place(x=1,y=463)
 UPCEntry = Entry(root,width=32,bd=3)
 UPCEntry.place(x=56,y=470)
 
->>>>>>> parent of 9f3ccf2... Added more labels
 
 root.geometry('{}x{}'.format(750,500))
 root.mainloop()
