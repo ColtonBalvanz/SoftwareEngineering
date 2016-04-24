@@ -4,10 +4,58 @@ import psycopg2
 from psycopg2.extensions import AsIs
 import urllib.parse
 import time
-
+import xlwt
+##from tkinter import Tk, Frame, Button, BOTH, Label
+##import time
+##This is the new version!!!
 
 ## class GUI
 ##      global upccode
+
+
+counter = 0
+dateString = str(time.strftime("%Y%m%d"))
+BOLD_CELLS = xlwt.easyxf('font: bold on')
+DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
+GENERATE_WORTH_NAME = "Worth_report_" + str(time.strftime("%m-%d-%Y"))
+
+
+##Try not to get too excited about this. I copied and pasted from the
+##GUI program I was working with to try out tkinter. :p Hopefully here
+##is where we link up the buttons. Clock works, quit should still work.
+##
+##class GUI(Frame):
+##  
+##    def __init__(self, parent):
+##        Frame.__init__(self, parent, background="grey")   
+##        self.parent = parent
+##        self.initUI()
+##        self.update_clock()
+##
+##    def update_clock(self):
+##        current = time.strftime("%I:%M:%S%p %B %d, %Y")
+##        someClock = Label(self, text=current, font=(10), padx=50)
+##        someClock.place(x=0, y=80)
+##        self.after(1000, self.update_clock)
+##
+##    def quit():
+##        global root
+##        root.quit()
+##        
+##    
+##    def initUI(self):
+##      
+##        self.parent.title("My Tool Client")
+##        self.pack(fill=BOTH, expand=1)
+##        quitButton = Button(self, text="Exit",
+##            command=quit, padx=50, pady=30)
+##        quitButton.place(x=674, y=0)
+##        adminButton = Button(self, text="Void Item(s)", padx=28, pady=30)
+##        adminButton.place(x=674, y=84)
+##        myToolLabel = Label(self, text="Welcome to MyTool!", font=("-weight bold", 24), padx=20)
+##        employeeName = Label(self, text="Bob", padx=119)
+##        myToolLabel.place(x=0, y=0)
+##        employeeName.place(x=0, y=42)
 
 
 
@@ -47,8 +95,9 @@ class connectTools:
             )
             global cursor
             cursor = conn.cursor()
+            return True
         except:
-            print("Sorry, I am unable to connect to the database")
+            return False
 
     def disconnect():
 ##This is called after connect(), and it should not be called before
@@ -68,8 +117,7 @@ class connectTools:
 
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s""", {"table": AsIs(table), "column": AsIs(column)})
-        records = cursor.fetchall()
-        pprint.pprint(records)
+        return cursor.fetchall()
 
     def query_single(table, column, args):
 ##This is helpful for when we want to look up an item more specifically.
@@ -78,8 +126,12 @@ class connectTools:
         
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
-        records = cursor.fetchall()
-        pprint.pprint(records)
+        return cursor.fetchone()
+
+    def query_column_names(table):
+        global cursor
+        cursor.execute("SELECT * FROM  information_schema.tables WHERE table_schema = 'schema_name' AND table_name = 'inventory'")
+        print(cursor.fetchall())
 
     def modify_single(table, operation, location):
 ##modify_single will do the work of subtracting a number of items from a
@@ -91,9 +143,10 @@ class connectTools:
         try:
             cursor.execute("""UPDATE ONLY %(table)s SET %(operation)s WHERE %(location)s;""", {"table": AsIs(table), "location": AsIs(location), "operation": AsIs(operation)})
             conn.commit()
+            return True
         except:
             print("Sorry, I was unable to modify with that statement")
-            
+            return False
             
     def add_sale(row):
 ##add_sale has the responsibility to add a row in the sales table, and
@@ -106,8 +159,14 @@ class connectTools:
                 """INSERT INTO sales (sale_id, items_purchased, item_prices)
     VALUES (%s, %s, %s);""", row)
             conn.commit()
+            return True
         except:
             print("Sorry, that was not a valid entry")
+            return False
+
+    def increment(add):
+        sqlstring = "quantity = quantity + " + add
+        return sqlstring
         
 
     def add_item(table, row):
@@ -125,33 +184,30 @@ class connectTools:
             """INSERT INTO inventory (item_id, quantity, category, price, cost, desired_quantity, sale, sale_start, sale_end, sale_price, supplier)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", row)
             conn.commit()
+            return True
         except:
             print("Sorry, I could not add this item")
-
-class saleOperations:
-##This new class will outline a different set of responsibilities more
-##abstract from the server. These methods will look more familiar to the
-##end user, but they will ultimately work with methods from the connection class.
-
-    counter = 0
-    dateString = str(time.strftime("%Y%m%d"))
+            return False
 
     def makeSale():
 ##The makeSale() method is responsible for producing the sale of a
 ##customer. It will also print out a physical receipt the customer can
 ##take with them.
-        
         global counter
+        global dateString
         counter += 1
         ticketID = dateString + str(counter)
         receiptString = ""
         while True:
-            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale." )
+            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale. " )
             if inputID == "":
                 break
             else:
-                pass
-            ##if connectTools.query_single("inventory", "item_id", "item_id = ?????????????") =! None
+                item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
+                if item != None:
+                    itemName = item[11]
+                    itemPrice = item[3]
+                    print(itemName, itemPrice)
             ##
             #retrieve item name and price
             #add to receiptString
@@ -179,29 +235,27 @@ class saleOperations:
 ##    def login(user_name, password):
 
 
-    def increment(add):
-        sqlstring = "quantity = quantity + " + add
-        return sqlstring
-
 def main():
 ##This probably won't be here for too long. Once we have a GUI we will
 ##have a more functional main() to operate out sale system.
 
     
     location = "item_id = 12000151200"
-    operation = saleOperations.increment('5')
+    operation = connectTools.increment('5')
     column_name = "*"
     table_name = "inventory"
     list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
-    connectTools.connect()
-    connectTools.modify_single(table_name, operation, location)
-##    connectTools.query(table_name, column_name)   
-##    connectTools.query_single(table_name, column_name, arguing)
-##    connectTools.add_item(list1)
-    connectTools.disconnect()
+    
+    if connectTools.connect()==True:
+        print("The connection was a success!")
+##        print(connectTools.query(table_name, column_name))
+        connectTools.makeSale()
+        connectTools.query_column_names("inventory")
+        connectTools.disconnect()
+    else:
+        print("Whoops! I can't even!")
+        exit()
 ##    time = makeSale.generate_id()
-    salesOperations.makeSale()
-
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
     main()
