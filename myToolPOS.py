@@ -6,6 +6,7 @@ import urllib.parse
 import time
 import xlwt
 from datetime import datetime
+from tkinter import *
 import os
 
 
@@ -66,7 +67,7 @@ class connectTools:
             global conn
             conn.close()
         except:
-            print("Sorry, I am not even connected right now. :o")
+            print("Sorry, I am not even connected right now.")
 
     def query(table, column):
 ##This method allows the user to query which table to access and which
@@ -86,11 +87,6 @@ class connectTools:
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
         return cursor.fetchone()
-
-    def query_column_names(table):
-        global cursor
-        cursor.execute("SELECT * FROM  information_schema.tables WHERE table_schema = 'schema_name' AND table_name = 'inventory'")
-        print(cursor.fetchall())
 
     def modify_single(table, operation, location):
 ##modify_single will do the work of subtracting a number of items from a
@@ -198,7 +194,6 @@ class connectTools:
 ##after it has been created so the customer can print the receipt.
         
         global ticketID
-        global dateString
         receipt = xlwt.Workbook()
         sale = receipt.add_sheet('Customer Receipt')
         sale.write_merge(0, 1, 0, 5, "My Tool", BRAND_CELL)
@@ -221,6 +216,21 @@ class connectTools:
         sale.write_merge(9+len(itemNames), 9+len(itemNames), 0, 5, "Have a great day!", xlwt.easyxf('align: horiz center'))
         receipt.save('Customer_receipt_' + ticketID+'.xls')
         os.system("start Customer_receipt_" + ticketID+ '.xls')
+
+    def generateWorth():
+        global GENERATE_WORTH_NAME
+        global DATE_CELL
+        COLUMN_HEADINGS = [("Item ID"), ("Quantity"), ("Cost"), ("Item Name")]
+        report = xlwt.Workbook()
+        dailyWorth = report.add_sheet(GENERATE_WORTH_NAME)
+        dailyWorth.write_merge(0, 1, 0, 11, GENERATE_WORTH_NAME, BRAND_CELL)
+        for x in range(0, len(COLUMN_HEADINGS)):
+            dailyWorth.write(2,x, COLUMN_HEADINGS[x])
+
+                             
+        report.save(GENERATE_WORTH_NAME + '.xls')
+        os.system("start " + GENERATE_WORTH_NAME + '.xls')
+        
 
 
     def decrement(subtract):
@@ -250,8 +260,9 @@ def main():
     if connectTools.connect()==True:
         print("The connection was a success!")
 ##        print(connectTools.query(table_name, column_name))
-        connectTools.makeSale()
-        connectTools.query_column_names("inventory")
+##        connectTools.makeSale()
+        connectTools.generateWorth()
+##        connectTools.query_column_names("inventory")
         connectTools.disconnect()
     else:
         print("Whoops! I can't even!")
