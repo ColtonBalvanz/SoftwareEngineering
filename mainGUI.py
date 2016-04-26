@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import *
-
+import os
+from myToolPOS import connectTools
+#from myToolPOS import *
 
 root = tk.Tk()
 root.wm_title("Main") #title of window
@@ -15,6 +17,9 @@ def done():
     """Exits the window when 'Exit' button is pressed"""
     root.destroy()
 
+def cashGUI():
+    os.system("cashierGUI.py")
+        
 #This block of code is what creates the buttons for each label
 modSales = Button(root,text="Modify Sales",width=15,height=2,bg="#c2d6d6")
 modSales.place(relx=.17, rely=.18, anchor="c")
@@ -22,7 +27,7 @@ viewAudits = Button(root,text="View Audits",width=15,height=2,bg="#c2d6d6")
 viewAudits.place(relx=.17, rely=.45, anchor="c")
 genDaily = Button(root,text="Generate Daily",width=15,height=2,bg="#c2d6d6")
 genDaily.place(relx=.17, rely=.72, anchor="c")
-cashMode = Button(root,text="Cashier Mode",width=10,height=5,bg="#c2d6d6")
+cashMode = Button(root,text="Cashier Mode",command=cashGUI,width=10,height=5,bg="#c2d6d6")
 cashMode.place(relx=.5,rely=.314,anchor="c")
 exButton = Button(root,text="Exit",command=done,width=10,height=5,bg="#c2d6d6")
 exButton.place(relx=.5,rely=.614,anchor="c")

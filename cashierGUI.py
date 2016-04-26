@@ -3,6 +3,7 @@ from tkinter import *
 
 root = tk.Tk()
 root.wm_title("Cashier")
+from myToolPOS import connectTools
 
 root.resizable(width=FALSE,height=FALSE) #Allows for non-expandable window 
 
@@ -57,7 +58,7 @@ taxEntry.place(x=189,y=360)
 #The labels that display the quantity and price of an item
 qtyLabel = Label(root,text="Qty #",font="Helvetica 16 bold",relief=RIDGE,
                  width=7)
-qtyLabel.place(x=277,y=1)
+qtyLabel.place(x=274,y=1)
 itemLabel = Label(root,text="Item",font="Helvetica 16 bold",relief=RIDGE,
                   width=11)
 itemLabel.place(x=370,y=1)
