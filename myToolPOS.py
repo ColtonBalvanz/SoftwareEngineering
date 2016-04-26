@@ -152,6 +152,7 @@ class connectTools:
         itemPrices = list()
         subTotal = 0
         salesTax = 0
+        inputIDlist = list()
         while True:
             inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale. ")
             if inputID == "":
@@ -159,6 +160,7 @@ class connectTools:
             else:
                 item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
                 if item != None:
+                    inputIDlist.append(inputID)
                     global itemNames
                     global itemPrices
                     itemNames.append(item[11])
@@ -177,6 +179,8 @@ class connectTools:
     #submit to sales db
     ##connectTools.add_sale()
     #decrement inventory
+        for itemID in inputIDlist:
+            connectTools.decrement("inventory", 1, itemID)
         global ticketID
         print(ticketID)
         print(itemNames)
@@ -236,14 +240,16 @@ class connectTools:
     def decrement(table, subtract, itemID):
 ##decrement() changes the quantity of an item in a database. There is
 ##not much important about this yet.
-        sqlstring = "quantity = quantity - " + subtract
-    global conn
+        sqlstring = "quantity = quantity - " + str(subtract)
+        global conn
         global cursor
         try:
             cursor.execute("""UPDATE ONLY %(table)s SET quantity =
             quantity - %(subtract)s WHERE item_id = %(item_id)s;""",
             {"table": AsIs(table), "item_id": AsIs(itemID) , "subtract":
-            AsIs(subtract)}) conn.commit() return True
+            AsIs(subtract)})
+            conn.commit()
+            return True
         except:
             print("Sorry, I was unable to modify with that statement")
             return False
@@ -269,7 +275,7 @@ def main():
     if connectTools.connect()==True:
         print("The connection was a success!")
 ##        print(connectTools.query(table_name, column_name))
-##        connectTools.makeSale()
+        connectTools.makeSale()
         connectTools.generateWorth()
 ##        connectTools.query_column_names("inventory")
         connectTools.disconnect()
