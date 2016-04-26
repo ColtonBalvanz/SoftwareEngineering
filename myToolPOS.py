@@ -5,58 +5,17 @@ from psycopg2.extensions import AsIs
 import urllib.parse
 import time
 import xlwt
-##from tkinter import Tk, Frame, Button, BOTH, Label
-##import time
-##This is the new version!!!
+from datetime import datetime
+import os
 
-## class GUI
-##      global upccode
 
 
 counter = 0
 dateString = str(time.strftime("%Y%m%d"))
-BOLD_CELLS = xlwt.easyxf('font: bold on')
+BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre; ")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_report_" + str(time.strftime("%m-%d-%Y"))
-
-
-##Try not to get too excited about this. I copied and pasted from the
-##GUI program I was working with to try out tkinter. :p Hopefully here
-##is where we link up the buttons. Clock works, quit should still work.
-##
-##class GUI(Frame):
-##  
-##    def __init__(self, parent):
-##        Frame.__init__(self, parent, background="grey")   
-##        self.parent = parent
-##        self.initUI()
-##        self.update_clock()
-##
-##    def update_clock(self):
-##        current = time.strftime("%I:%M:%S%p %B %d, %Y")
-##        someClock = Label(self, text=current, font=(10), padx=50)
-##        someClock.place(x=0, y=80)
-##        self.after(1000, self.update_clock)
-##
-##    def quit():
-##        global root
-##        root.quit()
-##        
-##    
-##    def initUI(self):
-##      
-##        self.parent.title("My Tool Client")
-##        self.pack(fill=BOTH, expand=1)
-##        quitButton = Button(self, text="Exit",
-##            command=quit, padx=50, pady=30)
-##        quitButton.place(x=674, y=0)
-##        adminButton = Button(self, text="Void Item(s)", padx=28, pady=30)
-##        adminButton.place(x=674, y=84)
-##        myToolLabel = Label(self, text="Welcome to MyTool!", font=("-weight bold", 24), padx=20)
-##        employeeName = Label(self, text="Bob", padx=119)
-##        myToolLabel.place(x=0, y=0)
-##        employeeName.place(x=0, y=42)
-
+ticketID = dateString + str(counter)
 
 
 class connectTools:
@@ -163,19 +122,15 @@ class connectTools:
         except:
             print("Sorry, that was not a valid entry")
             return False
-
-    def increment(add):
-        sqlstring = "quantity = quantity + " + add
-        return sqlstring
         
 
-    def add_item(table, row):
+    def add_item(row):
 ##add_item will add a new item to the inventory database. It will add
 ##whatever new item My Tool chooses to carry in the store. It takes the
-##arguement of the table name and the values of that new row, which are
-##the item_id, the quantity, category of the item, price, cost, how many
-##to keep in stock regularly, whether the item is on sale or not, the
-##sale start and end dates, the sale price, and who supplies that item.
+##arguement of the values of that new row, which are the item_id, the
+##quantity, category of the item, price, cost, how many to keep in stock
+##regularly, whether the item is on sale or not, the sale start and end
+##dates, the sale price, and who supplies that item.
 
         global conn
         global cursor
@@ -196,43 +151,89 @@ class connectTools:
         global counter
         global dateString
         counter += 1
-        ticketID = dateString + str(counter)
         receiptString = ""
+        itemNames = list()
+        itemPrices = list()
+        subTotal = 0
+        salesTax = 0
         while True:
-            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale. " )
+            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale. ")
             if inputID == "":
                 break
             else:
                 item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
                 if item != None:
-                    itemName = item[11]
-                    itemPrice = item[3]
-                    print(itemName, itemPrice)
-            ##
-            #retrieve item name and price
-            #add to receiptString
+                    global itemNames
+                    global itemPrices
+                    itemNames.append(item[11])
+                    if item[6] == True:
+                        global grandTotal
+                        itemPrices.append(item[9])
+                        subTotal += item[9]
+                    else:
+                        global grandTotal
+                        itemPrices.append(item[3])
+                        subTotal+= item[3]
+                else:
+                    print("Item was not found.")
+            global salesTax
+            salesTax = round((subTotal*7)/100)
     #submit to sales db
     ##connectTools.add_sale()
     #decrement inventory
+        global ticketID
         print(ticketID)
-        print("Thanks for shopping at My Tool!")
-        print("Have a great day!")
-        print(receiptString)
+        print(itemNames)
+        print(itemPrices)
+        print("Sub total: " + str(subTotal))
+        print("Sales tax: " + str(salesTax))
+        connectTools.generateReceipt(itemNames, itemPrices, subTotal, salesTax)
+
+
+    def generateReceipt(itemNames, itemPrices, subTotal, salesTax):
+##This new method relies on being called from makeSale(). It takes two
+##lists, and two integer values to generate a receipt for the customer.
+##It prints out to an excel file with formatted numbers. This is the
+##best we have to make a receipt for the cashier. It launches the file
+##after it has been created so the customer can print the receipt.
+        
+        global ticketID
+        global dateString
+        receipt = xlwt.Workbook()
+        sale = receipt.add_sheet('Customer Receipt')
+        sale.write_merge(0, 1, 0, 5, "My Tool", BRAND_CELL)
+        sale.write_merge(2, 2, 0, 3, "Today's date:", xlwt.easyxf('align: horiz right'))
+        sale.write_merge(2, 2, 4, 5, str(time.strftime("%m-%d-%Y")), xlwt.easyxf('align: horiz right'))
+        sale.write_merge(3, 3, 0, 3, "Your unique sale ID:", xlwt.easyxf('align: horiz right'))
+        sale.write_merge(3, 3, 4, 5, ticketID, xlwt.easyxf('align: horiz right'))
+        sale.write_merge(4, 4, 0, 3, "Item", BRAND_CELL)
+        sale.write_merge(4, 4, 4, 5, "Price", BRAND_CELL)
+        for x in range(0, len(itemNames)):
+            sale.write_merge(5+x, 5+x, 0, 3, itemNames[x])
+            sale.write_merge(5+x, 5+x, 4, 5, str(itemPrices[x]/100), xlwt.easyxf('align: horiz right'))
+        sale.write_merge(5+len(itemNames), 5+len(itemNames), 0, 3, "Sales Tax:", xlwt.easyxf('align: horiz right'))
+        sale.write_merge(5+len(itemNames), 5+len(itemNames), 4, 5, str(salesTax/100), xlwt.easyxf('align: horiz right'))
+        sale.write_merge(6+len(itemNames), 6+len(itemNames), 0, 3, "Sub total:", xlwt.easyxf('align: horiz right'))
+        sale.write_merge(6+len(itemNames), 6+len(itemNames), 4, 5, str(subTotal/100), xlwt.easyxf('align: horiz right'))
+        sale.write_merge(7+len(itemNames), 7+len(itemNames), 0, 3, "Total:", xlwt.easyxf('align: horiz right'))
+        sale.write_merge(7+len(itemNames), 7+len(itemNames), 4, 5, str((salesTax+subTotal)/100), xlwt.easyxf('align: horiz right'))
+        sale.write_merge(8+len(itemNames), 8+len(itemNames), 0, 5, "Thanks for shopping at My Tool!", xlwt.easyxf('align: horiz center'))
+        sale.write_merge(9+len(itemNames), 9+len(itemNames), 0, 5, "Have a great day!", xlwt.easyxf('align: horiz center'))
+        receipt.save('Customer_receipt_' + ticketID+'.xls')
+        os.system("start Customer_receipt_" + ticketID+ '.xls')
+
 
     def decrement(subtract):
 ##decrement() changes the quantity of an item in a database. There is
 ##not much important about this yet.
         sqlstring = "quantity = quantity - " + subtract
         return AsIs(sqlstring)
+    
     def increment(add):
 ##increment() changes the quanity of an item in a database.
         sqlstring = "quantity = quantity + " + add
         return AsIs(sqlstring)
 
-
-##class loginAccess:
-
-##    def login(user_name, password):
 
 
 def main():
@@ -255,7 +256,6 @@ def main():
     else:
         print("Whoops! I can't even!")
         exit()
-##    time = makeSale.generate_id()
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
     main()
