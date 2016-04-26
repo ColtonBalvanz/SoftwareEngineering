@@ -233,11 +233,20 @@ class connectTools:
         
 
 
-    def decrement(subtract):
+    def decrement(table, subtract, itemID):
 ##decrement() changes the quantity of an item in a database. There is
 ##not much important about this yet.
         sqlstring = "quantity = quantity - " + subtract
-        return AsIs(sqlstring)
+    global conn
+        global cursor
+        try:
+            cursor.execute("""UPDATE ONLY %(table)s SET quantity =
+            quantity - %(subtract)s WHERE item_id = %(item_id)s;""",
+            {"table": AsIs(table), "item_id": AsIs(itemID) , "subtract":
+            AsIs(subtract)}) conn.commit() return True
+        except:
+            print("Sorry, I was unable to modify with that statement")
+            return False
     
     def increment(add):
 ##increment() changes the quanity of an item in a database.
