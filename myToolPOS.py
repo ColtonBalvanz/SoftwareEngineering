@@ -100,7 +100,6 @@ class connectTools:
             conn.commit()
             return True
         except:
-            print("Sorry, I was unable to modify with that statement")
             return False
             
     def add_sale(row):
@@ -116,7 +115,6 @@ class connectTools:
             conn.commit()
             return True
         except:
-            print("Sorry, that was not a valid entry")
             return False
         
 
@@ -146,6 +144,8 @@ class connectTools:
 ##take with them.
         global counter
         global dateString
+        global itemNames
+        global itemPrices
         counter += 1
         receiptString = ""
         itemNames = list()
@@ -161,8 +161,6 @@ class connectTools:
                 item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
                 if item != None:
                     inputIDlist.append(inputID)
-                    global itemNames
-                    global itemPrices
                     itemNames.append(item[11])
                     if item[6] == True:
                         global grandTotal
@@ -174,14 +172,14 @@ class connectTools:
                         subTotal+= item[3]
                 else:
                     print("Item was not found.")
-            global salesTax
             salesTax = round((subTotal*7)/100)
-    #submit to sales db
-    ##connectTools.add_sale()
-    #decrement inventory
+        sale = list([int(ticketID), inputIDlist, itemPrices])
+        if connectTools.add_sale(sale)==True:
+            print("I added the sale!")
+        else:
+            print("Sorry, I could not add this item")
         for itemID in inputIDlist:
-            connectTools.decrement("inventory", 1, itemID)
-        global ticketID
+            connectTools.decrement(1, itemID)
         print(ticketID)
         print(itemNames)
         print(itemPrices)
@@ -237,16 +235,16 @@ class connectTools:
         
 
 
-    def decrement(table, subtract, itemID):
+    def decrement(subtract, itemID):
 ##decrement() changes the quantity of an item in a database. There is
 ##not much important about this yet.
         sqlstring = "quantity = quantity - " + str(subtract)
         global conn
         global cursor
         try:
-            cursor.execute("""UPDATE ONLY %(table)s SET quantity =
+            cursor.execute("""UPDATE ONLY inventory SET quantity =
             quantity - %(subtract)s WHERE item_id = %(item_id)s;""",
-            {"table": AsIs(table), "item_id": AsIs(itemID) , "subtract":
+            {"item_id": AsIs(itemID) , "subtract":
             AsIs(subtract)})
             conn.commit()
             return True
@@ -254,23 +252,28 @@ class connectTools:
             print("Sorry, I was unable to modify with that statement")
             return False
     
-    def increment(add):
-##increment() changes the quanity of an item in a database.
-        sqlstring = "quantity = quantity + " + add
-        return AsIs(sqlstring)
+    def increment(add, itemID):
+##increment() changes the quanity of an item in a database. We can use this
+## to do returns on items.
+        sqlstring = "quantity = quantity + " + str(add)
+        global conn
+        global cursor
+        try:
+            cursor.execute("""UPDATE ONLY inventory SET quantity =
+            quantity - %(add)s WHERE item_id = %(item_id)s;""",
+            {"item_id": AsIs(itemID) , "add":
+            AsIs(add)})
+            conn.commit()
+            return True
+        except:
+            print("Sorry, I was unable to modify with that statement")
+            return False
 
 
 
 def main():
 ##This probably won't be here for too long. Once we have a GUI we will
 ##have a more functional main() to operate out sale system.
-
-    
-    location = "item_id = 12000151200"
-    operation = connectTools.increment('5')
-    column_name = "*"
-    table_name = "inventory"
-    list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
     
     if connectTools.connect()==True:
         print("The connection was a success!")
