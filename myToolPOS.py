@@ -69,6 +69,18 @@ class connectTools:
         except:
             print("Sorry, I am not even connected right now.")
 
+    def check_count():
+        global cursor
+        global counter
+        cursor.execute("""SELECT MAX(sale_id) FROM sales;""")
+        current = cursor.fetchone()
+        if int(ticketID) >= int(current[0]):
+            print("Counter is in sync!")
+        else:
+            print("Adjusting the counter...")
+            counter+=1
+            ConnectTools.check_count()
+
     def query(table, column):
 ##This method allows the user to query which table to access and which
 ##column in the table. It may be useful, but query_single is more
@@ -277,9 +289,10 @@ def main():
     
     if connectTools.connect()==True:
         print("The connection was a success!")
+        connectTools.check_count()
 ##        print(connectTools.query(table_name, column_name))
-        connectTools.makeSale()
-        connectTools.generateWorth()
+##      connectTools.makeSale()
+##      connectTools.generateWorth()
 ##        connectTools.query_column_names("inventory")
         connectTools.disconnect()
     else:
