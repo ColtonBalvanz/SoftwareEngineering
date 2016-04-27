@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import *
 import os
-#from myToolPOS import connectTools
+from myToolPOS import connectTools
 #from myToolPOS import *
 
 root = tk.Tk()

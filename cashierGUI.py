@@ -3,7 +3,7 @@ from tkinter import *
 
 root = tk.Tk()
 root.wm_title("Cashier")
-#from myToolPOS import connectTools
+from newMakeSale import *
 
 root.resizable(width=FALSE,height=FALSE) #Allows for non-expandable window 
 
@@ -11,11 +11,25 @@ def done():
     """Exits the window when 'Exit' button is pressed"""
     root.destroy()
 
-#Buttons that are place on right hand side of window
+def implement():
+    """For buttons that were not yet implemented"""
+    window = tk.Toplevel()
+    window.title("Admin View")
+    window.resizable(width=FALSE,height=FALSE)
+    label = tk.Label(window,text="This feature has yet to be implemented.",
+                     font="Helvetica 10 bold")
+    label.pack(side="top",fill="both",padx=10,pady=10)
+
+def getUPCNum():
+    number = (Entry.get(UPCEntry))
+    print(number)
+    
+
+#Buttons that are placed on right hand side of window
 exButton = Button(root,text="Exit",command=done,width=12,height=6,bg="red",
                   font="Helvetica 15 bold")
 exButton.place(relx=.91,rely=.08,anchor="c")
-adminView = Button(root,text="Administrative View",width=12,height=3,bg="#c2d6d6",
+adminView = Button(root,text="Administrative View",command=implement,width=12,height=3,bg="#c2d6d6",
                    font="Helvetica 15 bold",wraplength=184, justify=CENTER)
 adminView.place(relx=.91,rely=.25,anchor="c")
 voidSale = Button(root,text="Void Sale",width=12,height=3,bg="#c2d6d6",
@@ -43,8 +57,8 @@ cashMode.place(x=45,y=45)
 #and UPC code
 UPCLabel = Label(root,text="UPC",font="Helvetica 15 bold")
 UPCLabel.place(x=1,y=463)
-UPCEntry = Entry(root,width=32,bd=3)
-UPCEntry.place(x=56,y=470)
+UPCEntry = Entry(root,width=20,bd=3)
+UPCEntry.place(x=55,y=468)
 totalLabel = Label(root,text="Total:",font="Helvetica 18 bold",relief=GROOVE,
                    width=12,height=5,anchor='nw')
 totalLabel.place(x=1,y=310)
@@ -65,6 +79,12 @@ itemLabel.place(x=370,y=1)
 priceLabel = Label(root,text="Price",font="Helvetica 16 bold",relief=RIDGE,
                    width=7)
 priceLabel.place(x=510,y=1)
+
+#For UPC entry
+UPCButton = Button(root,text="Enter",command=getUPCNum,width=8,height=2,bg="#00ff00",
+                  font="Helvetica 10 bold")
+UPCButton.place(relx=.31,rely=.95,anchor="c")
+
 
 
 root.geometry('{}x{}'.format(750,500)) #Size of window
