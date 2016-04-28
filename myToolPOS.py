@@ -12,11 +12,9 @@ import os
 
 
 counter = 0
-dateString = str(time.strftime("%Y%m%d"))
 BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre; ")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
-ticketID = dateString + str(counter)
 
 
 class connectTools:
@@ -32,7 +30,8 @@ class connectTools:
     server_info = None
     url = None
     cursor = None
-
+    dateString = None
+    ticketID = None
     
     def connect():
 ##The connect method opens the initial connection to the server. To
@@ -68,6 +67,28 @@ class connectTools:
             conn.close()
         except:
             print("Sorry, I am not even connected right now.")
+            
+        def check_count():
+        global cursor
+        cursor.execute("""SELECT MAX(sale_id) FROM sales;""")
+        current = cursor.fetchone()
+        if current != None:
+            global ticketID
+            global dateString
+            global counter
+            dateString = str(time.strftime("%Y%m%d"))
+            ticketID = dateString + str(counter)
+##          print(ticketID)
+            if int(ticketID) <= int(current[0]):
+                print("Adjusting the counter...")
+                counter+=1
+##              print(ticketID)
+                connectTools.check_count()
+            else:
+                print("Counter is now in sync!")
+##              print(ticketID)
+        else:
+            print("Counter looks good already!")        
 
     def query(table, column):
 ##This method allows the user to query which table to access and which
@@ -180,7 +201,7 @@ class connectTools:
     ##connectTools.add_sale()
     #decrement inventory
         for itemID in inputIDlist:
-            connectTools.decrement("inventory", 1, itemID)
+            connectTools.decrement(1, itemID)
         global ticketID
         print(ticketID)
         print(itemNames)
@@ -254,16 +275,16 @@ class connectTools:
         
 
 
-    def decrement(table, subtract, itemID):
+    def decrement(subtract, itemID):
 ##decrement() changes the quantity of an item in a database. There is
 ##not much important about this yet.
         sqlstring = "quantity = quantity - " + str(subtract)
         global conn
         global cursor
         try:
-            cursor.execute("""UPDATE ONLY %(table)s SET quantity =
+            cursor.execute("""UPDATE ONLY inventory SET quantity =
             quantity - %(subtract)s WHERE item_id = %(item_id)s;""",
-            {"table": AsIs(table), "item_id": AsIs(itemID) , "subtract":
+            {"item_id": AsIs(itemID) , "subtract":
             AsIs(subtract)})
             conn.commit()
             return True
@@ -271,10 +292,22 @@ class connectTools:
             print("Sorry, I was unable to modify with that statement")
             return False
     
-    def increment(add):
-##increment() changes the quanity of an item in a database.
-        sqlstring = "quantity = quantity + " + add
-        return AsIs(sqlstring)
+    def increment(add, itemID):
+##increment() changes the quanity of an item in a database. We can use this
+## to do returns on items.
+        sqlstring = "quantity = quantity + " + str(add)
+        global conn
+        global cursor
+        try:
+            cursor.execute("""UPDATE ONLY inventory SET quantity =
+            quantity - %(add)s WHERE item_id = %(item_id)s;""",
+            {"item_id": AsIs(itemID) , "add":
+            AsIs(add)})
+            conn.commit()
+            return True
+        except:
+            print("Sorry, I was unable to modify with that statement")
+            return False
 
 
 
@@ -282,13 +315,6 @@ def main():
 ##This probably won't be here for too long. Once we have a GUI we will
 ##have a more functional main() to operate out sale system.
 
-    
-    location = "item_id = 12000151200"
-    operation = connectTools.increment('5')
-    column_name = "*"
-    table_name = "inventory"
-    list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
-    
     if connectTools.connect()==True:
         print("The connection was a success!")
 ##        print(connectTools.query(table_name, column_name))
@@ -297,10 +323,8 @@ def main():
 ##        connectTools.query_column_names("inventory")
         connectTools.disconnect()
     else:
-        print("Whoops! I can't even!")
+        print("Whoops! I can't connect!")
         exit()
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
     main()
-def generateWorthReport():
-    return
