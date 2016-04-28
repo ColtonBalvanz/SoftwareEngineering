@@ -15,6 +15,8 @@ counter = 0
 BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre; ")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
+ALIGN_RIGHT = xlwt.easyxf("align: horiz right")
+ALIGN_CENTER = xlwt.easyxf("align: horiz center")
 
 
 class connectTools:
@@ -221,6 +223,8 @@ class connectTools:
 ##after it has been created so the customer can print the receipt.
         
         global ticketID
+        global ALIGN_RIGHT
+        global ALIGN_CENTER
         receipt = xlwt.Workbook()
         sale = receipt.add_sheet('Customer Receipt')
         sale.write_merge(0, 1, 0, 5, "My Tool", BRAND_CELL)
@@ -232,15 +236,15 @@ class connectTools:
         sale.write_merge(4, 4, 4, 5, "Price", BRAND_CELL)
         for x in range(0, len(itemNames)):
             sale.write_merge(5+x, 5+x, 0, 3, itemNames[x])
-            sale.write_merge(5+x, 5+x, 4, 5, str(itemPrices[x]/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(5+len(itemNames), 5+len(itemNames), 0, 3, "Sales Tax:", xlwt.easyxf('align: horiz right'))
-        sale.write_merge(5+len(itemNames), 5+len(itemNames), 4, 5, str(salesTax/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(6+len(itemNames), 6+len(itemNames), 0, 3, "Sub total:", xlwt.easyxf('align: horiz right'))
-        sale.write_merge(6+len(itemNames), 6+len(itemNames), 4, 5, str(subTotal/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(7+len(itemNames), 7+len(itemNames), 0, 3, "Total:", xlwt.easyxf('align: horiz right'))
-        sale.write_merge(7+len(itemNames), 7+len(itemNames), 4, 5, str((salesTax+subTotal)/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(8+len(itemNames), 8+len(itemNames), 0, 5, "Thanks for shopping at My Tool!", xlwt.easyxf('align: horiz center'))
-        sale.write_merge(9+len(itemNames), 9+len(itemNames), 0, 5, "Have a great day!", xlwt.easyxf('align: horiz center'))
+            sale.write_merge(5+x, 5+x, 4, 5, str(itemPrices[x]/100), ALIGN_RIGHT)
+        sale.write_merge(5+len(itemNames), 5+len(itemNames), 0, 3, "Sales Tax:", ALIGN_RIGHT)
+        sale.write_merge(5+len(itemNames), 5+len(itemNames), 4, 5, str(salesTax/100), ALIGN_RIGHT)
+        sale.write_merge(6+len(itemNames), 6+len(itemNames), 0, 3, "Sub total:", ALIGN_RIGHT)
+        sale.write_merge(6+len(itemNames), 6+len(itemNames), 4, 5, str(subTotal/100), ALIGN_RIGHT)
+        sale.write_merge(7+len(itemNames), 7+len(itemNames), 0, 3, "Total:", ALIGN_RIGHT)
+        sale.write_merge(7+len(itemNames), 7+len(itemNames), 4, 5, str((salesTax+subTotal)/100), ALIGN_RIGHT)
+        sale.write_merge(8+len(itemNames), 8+len(itemNames), 0, 5, "Thanks for shopping at My Tool!", ALIGN_RIGHT)
+        sale.write_merge(9+len(itemNames), 9+len(itemNames), 0, 5, "Have a great day!", ALIGN_CENTER)
         receipt.save('Customer_receipt_' + ticketID+'.xls')
         os.system("start Customer_receipt_" + ticketID+ '.xls')
 
