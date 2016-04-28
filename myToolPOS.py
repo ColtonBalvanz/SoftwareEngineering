@@ -54,6 +54,7 @@ class connectTools:
             )
             global cursor
             cursor = conn.cursor()
+            connectTools.check_count()
             return True
         except:
             return False
@@ -68,7 +69,7 @@ class connectTools:
         except:
             print("Sorry, I am not even connected right now.")
             
-        def check_count():
+    def check_count():
         global cursor
         cursor.execute("""SELECT MAX(sale_id) FROM sales;""")
         current = cursor.fetchone()
@@ -78,17 +79,17 @@ class connectTools:
             global counter
             dateString = str(time.strftime("%Y%m%d"))
             ticketID = dateString + str(counter)
-##          print(ticketID)
+    ##          print(ticketID)
             if int(ticketID) <= int(current[0]):
                 print("Adjusting the counter...")
                 counter+=1
-##              print(ticketID)
+    ##              print(ticketID)
                 connectTools.check_count()
             else:
                 print("Counter is now in sync!")
-##              print(ticketID)
+    ##              print(ticketID)
         else:
-            print("Counter looks good already!")        
+            print("Counter looks good already!")
 
     def query(table, column):
 ##This method allows the user to query which table to access and which
@@ -167,6 +168,8 @@ class connectTools:
 ##take with them.
         global counter
         global dateString
+        global itemNames
+        global itemPrices
         counter += 1
         receiptString = ""
         itemNames = list()
@@ -182,8 +185,6 @@ class connectTools:
                 item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
                 if item != None:
                     inputIDlist.append(inputID)
-                    global itemNames
-                    global itemPrices
                     itemNames.append(item[11])
                     if item[6] == True:
                         global grandTotal
@@ -195,20 +196,21 @@ class connectTools:
                         subTotal+= item[3]
                 else:
                     print("Item was not found.")
-            global salesTax
             salesTax = round((subTotal*7)/100)
-    #submit to sales db
-    ##connectTools.add_sale()
-    #decrement inventory
+        sale = list([int(ticketID), inputIDlist, itemPrices])
+        if connectTools.add_sale(sale)==True:
+            print("I added the sale!")
+        else:
+            print("Sorry, I could not add this item")
         for itemID in inputIDlist:
             connectTools.decrement(1, itemID)
-        global ticketID
         print(ticketID)
         print(itemNames)
         print(itemPrices)
         print("Sub total: " + str(subTotal))
         print("Sales tax: " + str(salesTax))
         connectTools.generateReceipt(itemNames, itemPrices, subTotal, salesTax)
+
 
 
     def generateReceipt(itemNames, itemPrices, subTotal, salesTax):
