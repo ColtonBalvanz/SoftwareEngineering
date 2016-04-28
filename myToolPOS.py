@@ -15,7 +15,7 @@ counter = 0
 dateString = str(time.strftime("%Y%m%d"))
 BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre; ")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
-GENERATE_WORTH_NAME = "Worth_report_" + str(time.strftime("%m-%d-%Y"))
+GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
 ticketID = dateString + str(counter)
 
 
@@ -69,18 +69,6 @@ class connectTools:
         except:
             print("Sorry, I am not even connected right now.")
 
-    def check_count():
-        global cursor
-        global counter
-        cursor.execute("""SELECT MAX(sale_id) FROM sales;""")
-        current = cursor.fetchone()
-        if int(ticketID) >= int(current[0]):
-            print("Counter is in sync!")
-        else:
-            print("Adjusting the counter...")
-            counter+=1
-            ConnectTools.check_count()
-
     def query(table, column):
 ##This method allows the user to query which table to access and which
 ##column in the table. It may be useful, but query_single is more
@@ -112,6 +100,7 @@ class connectTools:
             conn.commit()
             return True
         except:
+            print("Sorry, I was unable to modify with that statement")
             return False
             
     def add_sale(row):
@@ -127,6 +116,7 @@ class connectTools:
             conn.commit()
             return True
         except:
+            print("Sorry, that was not a valid entry")
             return False
         
 
@@ -156,8 +146,6 @@ class connectTools:
 ##take with them.
         global counter
         global dateString
-        global itemNames
-        global itemPrices
         counter += 1
         receiptString = ""
         itemNames = list()
@@ -173,6 +161,8 @@ class connectTools:
                 item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
                 if item != None:
                     inputIDlist.append(inputID)
+                    global itemNames
+                    global itemPrices
                     itemNames.append(item[11])
                     if item[6] == True:
                         global grandTotal
@@ -184,14 +174,14 @@ class connectTools:
                         subTotal+= item[3]
                 else:
                     print("Item was not found.")
+            global salesTax
             salesTax = round((subTotal*7)/100)
-        sale = list([int(ticketID), inputIDlist, itemPrices])
-        if connectTools.add_sale(sale)==True:
-            print("I added the sale!")
-        else:
-            print("Sorry, I could not add this item")
+    #submit to sales db
+    ##connectTools.add_sale()
+    #decrement inventory
         for itemID in inputIDlist:
-            connectTools.decrement(1, itemID)
+            connectTools.decrement("inventory", 1, itemID)
+        global ticketID
         print(ticketID)
         print(itemNames)
         print(itemPrices)
@@ -234,29 +224,46 @@ class connectTools:
     def generateWorth():
         global GENERATE_WORTH_NAME
         global DATE_CELL
-        COLUMN_HEADINGS = [("Item ID"), ("Quantity"), ("Cost"), ("Item Name")]
+        rowIndex = 3
+        colIndex = 0
+        records = connectTools.query('inventory', '*')
+
+        COLUMN_HEADINGS = [("Item ID"), ("Item Name"),
+                           ("Quantity"), ("Cost"), ("Total Cost")]
         report = xlwt.Workbook()
         dailyWorth = report.add_sheet(GENERATE_WORTH_NAME)
         dailyWorth.write_merge(0, 1, 0, 11, GENERATE_WORTH_NAME, BRAND_CELL)
         for x in range(0, len(COLUMN_HEADINGS)):
             dailyWorth.write(2,x, COLUMN_HEADINGS[x])
-
+        
+        for row in records:
+            itemID = row[0]
+            itemName = row[11]
+            quantity = row[1]
+            cost = row [4]
+            totalCost = cost*quantity
+            dailyWorth.write(rowIndex, 0, itemID)
+            dailyWorth.write(rowIndex, 1, itemName)
+            dailyWorth.write(rowIndex, 2, quantity)
+            dailyWorth.write(rowIndex, 3, cost)
+            dailyWorth.write(rowIndex, 4, totalCost)
+            rowIndex += 1
                              
         report.save(GENERATE_WORTH_NAME + '.xls')
         os.system("start " + GENERATE_WORTH_NAME + '.xls')
         
 
 
-    def decrement(subtract, itemID):
+    def decrement(table, subtract, itemID):
 ##decrement() changes the quantity of an item in a database. There is
 ##not much important about this yet.
         sqlstring = "quantity = quantity - " + str(subtract)
         global conn
         global cursor
         try:
-            cursor.execute("""UPDATE ONLY inventory SET quantity =
+            cursor.execute("""UPDATE ONLY %(table)s SET quantity =
             quantity - %(subtract)s WHERE item_id = %(item_id)s;""",
-            {"item_id": AsIs(itemID) , "subtract":
+            {"table": AsIs(table), "item_id": AsIs(itemID) , "subtract":
             AsIs(subtract)})
             conn.commit()
             return True
@@ -264,35 +271,29 @@ class connectTools:
             print("Sorry, I was unable to modify with that statement")
             return False
     
-    def increment(add, itemID):
-##increment() changes the quanity of an item in a database. We can use this
-## to do returns on items.
-        sqlstring = "quantity = quantity + " + str(add)
-        global conn
-        global cursor
-        try:
-            cursor.execute("""UPDATE ONLY inventory SET quantity =
-            quantity - %(add)s WHERE item_id = %(item_id)s;""",
-            {"item_id": AsIs(itemID) , "add":
-            AsIs(add)})
-            conn.commit()
-            return True
-        except:
-            print("Sorry, I was unable to modify with that statement")
-            return False
+    def increment(add):
+##increment() changes the quanity of an item in a database.
+        sqlstring = "quantity = quantity + " + add
+        return AsIs(sqlstring)
 
 
 
 def main():
 ##This probably won't be here for too long. Once we have a GUI we will
 ##have a more functional main() to operate out sale system.
+
+    
+    location = "item_id = 12000151200"
+    operation = connectTools.increment('5')
+    column_name = "*"
+    table_name = "inventory"
+    list1 = (12000151200, 10, 'beverage', 189, 150, 5, None, None, None, None, 'MY TOOL INC')
     
     if connectTools.connect()==True:
         print("The connection was a success!")
-        connectTools.check_count()
 ##        print(connectTools.query(table_name, column_name))
-##      connectTools.makeSale()
-##      connectTools.generateWorth()
+        connectTools.makeSale()
+        connectTools.generateWorth()
 ##        connectTools.query_column_names("inventory")
         connectTools.disconnect()
     else:
@@ -301,3 +302,5 @@ def main():
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
     main()
+def generateWorthReport():
+    return
