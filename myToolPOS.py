@@ -12,11 +12,11 @@ import os
 
 
 counter = 0
-dateString = str(time.strftime("%Y%m%d"))
 BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre; ")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
-GENERATE_WORTH_NAME = "Worth_report_" + str(time.strftime("%m-%d-%Y"))
-ticketID = dateString + str(counter)
+GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
+ALIGN_RIGHT = xlwt.easyxf("align: horiz right")
+ALIGN_CENTER = xlwt.easyxf("align: horiz center")
 
 
 class connectTools:
@@ -32,7 +32,8 @@ class connectTools:
     server_info = None
     url = None
     cursor = None
-
+    dateString = None
+    ticketID = None
     
     def connect():
 ##The connect method opens the initial connection to the server. To
@@ -55,6 +56,7 @@ class connectTools:
             )
             global cursor
             cursor = conn.cursor()
+            connectTools.check_count()
             return True
         except:
             return False
@@ -68,18 +70,28 @@ class connectTools:
             conn.close()
         except:
             print("Sorry, I am not even connected right now.")
-
+            
     def check_count():
         global cursor
-        global counter
         cursor.execute("""SELECT MAX(sale_id) FROM sales;""")
         current = cursor.fetchone()
-        if int(ticketID) >= int(current[0]):
-            print("Counter is in sync!")
+        if current != None:
+            global ticketID
+            global dateString
+            global counter
+            dateString = str(time.strftime("%Y%m%d"))
+            ticketID = dateString + str(counter)
+    ##          print(ticketID)
+            if int(ticketID) <= int(current[0]):
+                print("Adjusting the counter...")
+                counter+=1
+    ##              print(ticketID)
+                connectTools.check_count()
+            else:
+                print("Counter is now in sync!")
+    ##              print(ticketID)
         else:
-            print("Adjusting the counter...")
-            counter+=1
-            ConnectTools.check_count()
+            print("Counter looks good already!")
 
     def query(table, column):
 ##This method allows the user to query which table to access and which
@@ -112,6 +124,7 @@ class connectTools:
             conn.commit()
             return True
         except:
+            print("Sorry, I was unable to modify with that statement")
             return False
             
     def add_sale(row):
@@ -127,6 +140,7 @@ class connectTools:
             conn.commit()
             return True
         except:
+            print("Sorry, that was not a valid entry")
             return False
         
 
@@ -206,6 +220,7 @@ class connectTools:
         else:
            return tuple([None, None, None])
 
+
     def generateReceipt(itemNames, itemPrices, subTotal, salesTax):
 ##This new method relies on being called from makeSale(). It takes two
 ##lists, and two integer values to generate a receipt for the customer.
@@ -214,6 +229,8 @@ class connectTools:
 ##after it has been created so the customer can print the receipt.
         
         global ticketID
+        global ALIGN_RIGHT
+        global ALIGN_CENTER
         receipt = xlwt.Workbook()
         sale = receipt.add_sheet('Customer Receipt')
         sale.write_merge(0, 1, 0, 5, "My Tool", BRAND_CELL)
@@ -225,28 +242,45 @@ class connectTools:
         sale.write_merge(4, 4, 4, 5, "Price", BRAND_CELL)
         for x in range(0, len(itemNames)):
             sale.write_merge(5+x, 5+x, 0, 3, itemNames[x])
-            sale.write_merge(5+x, 5+x, 4, 5, str(itemPrices[x]/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(5+len(itemNames), 5+len(itemNames), 0, 3, "Sales Tax:", xlwt.easyxf('align: horiz right'))
-        sale.write_merge(5+len(itemNames), 5+len(itemNames), 4, 5, str(salesTax/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(6+len(itemNames), 6+len(itemNames), 0, 3, "Sub total:", xlwt.easyxf('align: horiz right'))
-        sale.write_merge(6+len(itemNames), 6+len(itemNames), 4, 5, str(subTotal/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(7+len(itemNames), 7+len(itemNames), 0, 3, "Total:", xlwt.easyxf('align: horiz right'))
-        sale.write_merge(7+len(itemNames), 7+len(itemNames), 4, 5, str((salesTax+subTotal)/100), xlwt.easyxf('align: horiz right'))
-        sale.write_merge(8+len(itemNames), 8+len(itemNames), 0, 5, "Thanks for shopping at My Tool!", xlwt.easyxf('align: horiz center'))
-        sale.write_merge(9+len(itemNames), 9+len(itemNames), 0, 5, "Have a great day!", xlwt.easyxf('align: horiz center'))
+            sale.write_merge(5+x, 5+x, 4, 5, str(itemPrices[x]/100), ALIGN_RIGHT)
+        sale.write_merge(5+len(itemNames), 5+len(itemNames), 0, 3, "Sales Tax:", ALIGN_RIGHT)
+        sale.write_merge(5+len(itemNames), 5+len(itemNames), 4, 5, str(salesTax/100), ALIGN_RIGHT)
+        sale.write_merge(6+len(itemNames), 6+len(itemNames), 0, 3, "Sub total:", ALIGN_RIGHT)
+        sale.write_merge(6+len(itemNames), 6+len(itemNames), 4, 5, str(subTotal/100), ALIGN_RIGHT)
+        sale.write_merge(7+len(itemNames), 7+len(itemNames), 0, 3, "Total:", ALIGN_RIGHT)
+        sale.write_merge(7+len(itemNames), 7+len(itemNames), 4, 5, str((salesTax+subTotal)/100), ALIGN_RIGHT)
+        sale.write_merge(8+len(itemNames), 8+len(itemNames), 0, 5, "Thanks for shopping at My Tool!", ALIGN_RIGHT)
+        sale.write_merge(9+len(itemNames), 9+len(itemNames), 0, 5, "Have a great day!", ALIGN_CENTER)
         receipt.save('Customer_receipt_' + ticketID+'.xls')
         os.system("start Customer_receipt_" + ticketID+ '.xls')
 
     def generateWorth():
         global GENERATE_WORTH_NAME
         global DATE_CELL
-        COLUMN_HEADINGS = [("Item ID"), ("Quantity"), ("Cost"), ("Item Name")]
+        rowIndex = 3
+        colIndex = 0
+        records = connectTools.query('inventory', '*')
+
+        COLUMN_HEADINGS = [("Item ID"), ("Item Name"),
+                           ("Quantity"), ("Cost"), ("Total Cost")]
         report = xlwt.Workbook()
         dailyWorth = report.add_sheet(GENERATE_WORTH_NAME)
         dailyWorth.write_merge(0, 1, 0, 11, GENERATE_WORTH_NAME, BRAND_CELL)
         for x in range(0, len(COLUMN_HEADINGS)):
             dailyWorth.write(2,x, COLUMN_HEADINGS[x])
-
+        
+        for row in records:
+            itemID = row[0]
+            itemName = row[11]
+            quantity = row[1]
+            cost = row [4]
+            totalCost = cost*quantity
+            dailyWorth.write(rowIndex, 0, itemID)
+            dailyWorth.write(rowIndex, 1, itemName)
+            dailyWorth.write(rowIndex, 2, quantity)
+            dailyWorth.write(rowIndex, 3, cost)
+            dailyWorth.write(rowIndex, 4, totalCost)
+            rowIndex += 1
                              
         report.save(GENERATE_WORTH_NAME + '.xls')
         os.system("start " + GENERATE_WORTH_NAME + '.xls')
@@ -292,17 +326,16 @@ class connectTools:
 def main():
 ##This probably won't be here for too long. Once we have a GUI we will
 ##have a more functional main() to operate out sale system.
-    
+
     if connectTools.connect()==True:
         print("The connection was a success!")
-        connectTools.check_count()
 ##        print(connectTools.query(table_name, column_name))
-##      connectTools.makeSale()
-##      connectTools.generateWorth()
+        connectTools.makeSale()
+        connectTools.generateWorth()
 ##        connectTools.query_column_names("inventory")
         connectTools.disconnect()
     else:
-        print("Whoops! I can't even!")
+        print("Whoops! I can't connect!")
         exit()
 ##This works, I don't know how, but it does.
 if __name__ == '__main__':
