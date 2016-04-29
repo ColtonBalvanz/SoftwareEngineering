@@ -4,11 +4,14 @@ from tkinter import *
 root = tk.Tk()
 root.wm_title("Cashier")
 from newMakeSale import *
+from myToolPOS import *
 
 root.resizable(width=FALSE,height=FALSE) #Allows for non-expandable window 
 
+connectTools.connect()
+
 def done():
-    """Exits the window when 'Exit' button is pressed"""
+    """Exits the main window when 'Exit' button is pressed"""
     root.destroy()
 
 def implement():
@@ -21,10 +24,51 @@ def implement():
     label.pack(side="top",fill="both",padx=10,pady=10)
 
 def getUPCNum():
+    """Gets UPC number that was inputted by user on the Cashier GUI"""
+    window = tk.Toplevel()
     number = (Entry.get(UPCEntry))
-    print(number)
+    connectTools.newMakeSale(number)
+    window.resizable(width=FALSE,height=FALSE)
+    label = Label(window,text="Success!",font="Helvetica 13 bold")
+    label.pack(side="top",fill="both",padx=10,pady=10)
+    window.after(2000, lambda: window.destroy())
+    window.geometry('{}x{}'.format(180,60))
     
+#def removed():
+    #Use Colton's code when user clicks yes
 
+def verifyRemove():
+    """This window appears after UPC code has been entered for verification"""
+    window=tk.Toplevel()
+    window.resizable(width=FALSE,height=FALSE)
+    verifyLabel = Label(window,text="Are you sure you want to remove this item?",
+                        font="Helvetica 10 bold")
+    verifyLabel.pack(side="top",fill="both",padx=10,pady=10)
+    yesButton = Button(window,text="YES",width=10)#command=removed)
+    yesButton.place(x=40,y=55)
+    
+    def windowDone():
+        """Exits out of the window when user clicks 'NO'"""
+        window.destroy()
+        
+    noButton = Button(window,text="NO",width=10,command=windowDone)
+    noButton.place(x=190,y=55)
+    window.geometry('{}x{}'.format(310,90))
+
+def removeItem():
+    """The window that appears when you click 'Void Item.' This asks for a UPC code to remove."""
+    window = tk.Toplevel()
+    window.title("Void Item")
+    window.resizable(width=FALSE,height=FALSE)
+    removeLabel = Label(window,text="Enter UPC number to remove:",font="Helvetica 10 bold")
+    removeLabel.pack(side="top")
+    removeUPC = Entry(window)
+    removeUPC.pack(side="top",fill="both",padx=10,pady=10)
+    UPCButton = Button(window,text="Enter",command=verifyRemove)
+    UPCButton.pack(side="bottom")
+    window.geometry('{}x{}'.format(290,90))
+    
+    
 #Buttons that are placed on right hand side of window
 exButton = Button(root,text="Exit",command=done,width=12,height=6,bg="red",
                   font="Helvetica 15 bold")
@@ -35,7 +79,7 @@ adminView.place(relx=.91,rely=.25,anchor="c")
 voidSale = Button(root,text="Void Sale",width=12,height=3,bg="#c2d6d6",
                   font="Helvetica 15 bold")
 voidSale.place(relx=.91,rely=.42,anchor="c")
-voidItem = Button(root,text="Void Item",width=12,height=3,bg="#c2d6d6",
+voidItem = Button(root,text="Void Item",command=removeItem,width=12,height=3,bg="#c2d6d6",
                   font="Helvetica 15 bold")
 voidItem.place(relx=.91,rely=.59,anchor="c")
 payNow = Button(root,text="Pay Now!",width=12,height=6,bg="#00ff00",
