@@ -199,6 +199,12 @@ class connectTools:
         print("Sales tax: " + str(salesTax))
         connectTools.generateReceipt(itemNames, itemPrices, subTotal, salesTax)
 
+    def newMakeSale(itemID):
+        item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
+        if item != None:
+            return tuple([itemID, item[11], item[9]])
+        else:
+           return tuple([None, None, None])
 
     def generateReceipt(itemNames, itemPrices, subTotal, salesTax):
 ##This new method relies on being called from makeSale(). It takes two
