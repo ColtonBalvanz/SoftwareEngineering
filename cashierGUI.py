@@ -14,6 +14,14 @@ def done():
     """Exits the main window when 'Exit' button is pressed"""
     root.destroy()
 
+def errorChecking():
+    window = tk.Toplevel()
+    window.resizable(width=FALSE,height=FALSE)
+    label = Label(window,text="You must input a UPC code!",font="Helvetica 13 bold")
+    label.pack(side="top",fill="both",padx=10,pady=10)
+    window.after(3000, lambda: window.destroy())
+    window.geometry('{}x{}'.format(280,60))
+
 def implement():
     """For buttons that were not yet implemented"""
     window = tk.Toplevel()
@@ -25,14 +33,18 @@ def implement():
 
 def getUPCNum():
     """Gets UPC number that was inputted by user on the Cashier GUI"""
-    window = tk.Toplevel()
+    #window = tk.Toplevel()
     number = (Entry.get(UPCEntry))
-    connectTools.newMakeSale(number)
-    window.resizable(width=FALSE,height=FALSE)
-    label = Label(window,text="Success!",font="Helvetica 13 bold")
-    label.pack(side="top",fill="both",padx=10,pady=10)
-    window.after(2000, lambda: window.destroy())
-    window.geometry('{}x{}'.format(180,60))
+    if len(number) == 0:
+        errorChecking()
+    else:
+        window = tk.Toplevel()
+        connectTools.newMakeSale(number)
+        window.resizable(width=FALSE,height=FALSE)
+        label = Label(window,text="Success!",font="Helvetica 13 bold")
+        label.pack(side="top",fill="both",padx=10,pady=10)
+        window.after(3000, lambda: window.destroy())
+        window.geometry('{}x{}'.format(180,60))
     
 #def removed():
     #Use Colton's code when user clicks yes
@@ -87,14 +99,14 @@ payNow = Button(root,text="Pay Now!",width=12,height=6,bg="#00ff00",
 payNow.place(relx=.91,rely=.835,anchor="c")
 
 #MyTool label
-text = Text(root, width=15, height=8,font="Helvetica 25 bold")
+text = Text(root, width=15, height=8,font="Helvetica 25 bold",background="#c2d6d6")
 text.insert('2.0', 'My Tool\n')
-text.tag_configure("center",justify="center")
+text.tag_configure("center",justify="center",background="#c2d6d6")
 text.tag_add("center",1.0, "end")
 text.place(x=0,y=0)
 
 #Label under 'My Tool'
-cashMode = Label(root,text="Cashier Mode",font="Helvetica 21",bg="white")
+cashMode = Label(root,text="Cashier Mode",font="Helvetica 21",bg="#c2d6d6")
 cashMode.place(x=45,y=45)
 
 #Labels and entries that correspond to the total price, sales tax,
