@@ -12,11 +12,14 @@ import os
 
 
 counter = 0
-BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre; ")
+BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre;")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
 ALIGN_RIGHT = xlwt.easyxf("align: horiz right")
 ALIGN_CENTER = xlwt.easyxf("align: horiz center")
+BOLDED_CENTER = xlwt.easyxf("align: horiz center; font: bold on")
+MONEY_FORMAT = xlwt.easyxf(num_format_str = '$#,##0.00')
+REMOVE_SCIENTIFIC = xlwt.easyxf(num_format_str = '0')
 
 
 class connectTools:
@@ -34,6 +37,11 @@ class connectTools:
     cursor = None
     dateString = None
     ticketID = None
+    itemNames = list()
+    itemPrices = list()
+    subTotal = 0
+    salesTax = 0
+    inputIDlist = list()
     
     def connect():
 ##The connect method opens the initial connection to the server. To
@@ -172,6 +180,10 @@ class connectTools:
         global dateString
         global itemNames
         global itemPrices
+        global inputIDlist
+        global grandTotal
+        global salesTax
+        global subTotal
         counter += 1
         receiptString = ""
         itemNames = list()
@@ -257,6 +269,8 @@ class connectTools:
     def generateWorth():
         global GENERATE_WORTH_NAME
         global DATE_CELL
+        global MONEY_FORMAT
+        global ALIGN_CENTER
         rowIndex = 3
         colIndex = 0
         records = connectTools.query('inventory', '*')
@@ -265,9 +279,9 @@ class connectTools:
                            ("Quantity"), ("Cost"), ("Total Cost")]
         report = xlwt.Workbook()
         dailyWorth = report.add_sheet(GENERATE_WORTH_NAME)
-        dailyWorth.write_merge(0, 1, 0, 11, GENERATE_WORTH_NAME, BRAND_CELL)
+        dailyWorth.write_merge(0, 1, 0, 4, GENERATE_WORTH_NAME, BRAND_CELL)
         for x in range(0, len(COLUMN_HEADINGS)):
-            dailyWorth.write(2,x, COLUMN_HEADINGS[x])
+            dailyWorth.write(2,x, COLUMN_HEADINGS[x], BOLDED_CENTER)
         
         for row in records:
             itemID = row[0]
@@ -275,13 +289,15 @@ class connectTools:
             quantity = row[1]
             cost = row [4]
             totalCost = cost*quantity
-            dailyWorth.write(rowIndex, 0, itemID)
-            dailyWorth.write(rowIndex, 1, itemName)
+            dailyWorth.write(rowIndex, 0, itemID, REMOVE_SCIENTIFIC)
+            dailyWorth.write(rowIndex, 1, itemName, ALIGN_CENTER)
             dailyWorth.write(rowIndex, 2, quantity)
-            dailyWorth.write(rowIndex, 3, cost)
-            dailyWorth.write(rowIndex, 4, totalCost)
+            dailyWorth.write(rowIndex, 3, (cost/100), MONEY_FORMAT)
+            dailyWorth.write(rowIndex, 4, (totalCost/100), MONEY_FORMAT)
             rowIndex += 1
-                             
+        for col in range(0, len(COLUMN_HEADINGS)):
+            column = dailyWorth.col(col)
+            column.width = 256*25
         report.save(GENERATE_WORTH_NAME + '.xls')
         os.system("start " + GENERATE_WORTH_NAME + '.xls')
         
@@ -329,10 +345,8 @@ def main():
 
     if connectTools.connect()==True:
         print("The connection was a success!")
-##        print(connectTools.query(table_name, column_name))
         connectTools.makeSale()
         connectTools.generateWorth()
-##        connectTools.query_column_names("inventory")
         connectTools.disconnect()
     else:
         print("Whoops! I can't connect!")
