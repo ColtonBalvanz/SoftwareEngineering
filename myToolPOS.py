@@ -92,9 +92,7 @@ class connectTools:
             dateString = str(time.strftime("%Y%m%d"))
             #ticketID = dateString + str(counter)
             ticketID = dateString + "000"
-            print("1: ", ticketID)
             ticketID = int(ticketID) + counter
-            print("2: ", str(ticketID))
             if int(ticketID) <= int(current[0]):
                 print("Adjusting the counter...")
                 counter+=1
@@ -231,11 +229,17 @@ class connectTools:
         connectTools.generateReceipt(itemNames, itemPrices, subTotal, salesTax)
 
     def newMakeSale(itemID):
+        global itemList
         item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
         if item != None:
-            return tuple([itemID, item[11], item[9]])
+            itemList.append(tuple([itemID, item[11], item[9]]))
         else:
-            return tuple([None, None, None])
+                window = tk.Toplevel()
+                window.resizable(width=FALSE,height=FALSE)
+                label = Label(window,text="The UPC code you entered was not found in the database!",font="Helvetica 13 bold")
+                label.pack(side="top",fill="both",padx=10,pady=10)
+                window.after(3000, lambda: window.destroy())
+                window.geometry('{}x{}'.format(280,60))
 
     def voidItem(itemID):
         global itemList
@@ -364,7 +368,7 @@ def main():
 
     if connectTools.connect()==True:
         print("The connection was a success!")
-        connectTools.makeSale()
+        #connectTools.makeSale()
         connectTools.generateWorth()
         connectTools.disconnect()
     else:
