@@ -348,7 +348,46 @@ class connectTools:
         os.system("start " + GENERATE_DAILY_REPORT_NAME + '.xls')
         
 
-        
+    def parse_list(alist):
+        newList = list()
+        item_ids = list()
+        item_prices = list()
+        sale_ids = list()
+        newList.append(sale_ids)
+        newList.append(item_ids)
+        newList.append(item_prices)
+        #print(newList)
+        individual_item = ""
+        for row in range(0,len(alist)):
+            print(row)
+            newList[0].append(alist[row][0])
+            #print(newList[0])
+            for index in range(1,3):
+                individual_item = ""
+                for character in alist[row][index]:
+                    #if alist[row][index][character] == ',':
+                    if character == ',':
+                        newList[index].append(individual_item)
+                        individual_item = ""
+                        #print(newList)
+                    #elif alist[row][index][character] == '{':
+                    elif character == '{':
+                        #print("Begin list")
+                        pass
+                    #elif alist[row][index][character] == '}':
+                    elif character == '}':
+                        newList[index].append(individual_item)
+                        #individual_item = ""
+                        #print("End list")
+                        pass
+                    #elif alist[row][index][character] == ' ':
+                    elif character == ' ':
+                        #print("A space")
+                        pass
+                    else:
+                        individual_item += character
+                        #print(individual_item)
+        return newList    
     
 
     def decrement(subtract, itemID):
