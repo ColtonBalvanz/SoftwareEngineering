@@ -234,7 +234,10 @@ class connectTools:
         global itemList
         item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
         if item != None:
-            itemList.append(tuple([itemID, item[11], item[9]]))
+            if item[6] == True:
+                itemList.append(tuple([itemID, item[11], item[9]]))
+            else:
+                itemList.append(tuple([itemID, item[11], item[3]]))
         else:
             window = tk.Toplevel()
             window.resizable(width=FALSE,height=FALSE)
@@ -247,9 +250,20 @@ class connectTools:
         global itemList
         item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
         if item != None:
-            listItem = tuple([itemID, item[11], item[9]])
-            if listItem in itemList:
-                itemList.remove(listItem)
+            if item[6] == True:
+                listItem = tuple([itemID, item[11], item[9]])
+            else:
+                listItem = tuple([itemID, item[11], item[3]])
+        else:
+            window = tk.Toplevel()
+            window.resizable(width=FALSE,height=FALSE)
+            label = Label(window,text="The UPC code you entered was not found in the database!",font="Helvetica 13 bold")
+            label.pack(side="top",fill="both",padx=10,pady=10)
+            window.after(3000, lambda: window.destroy())
+            window.geometry('{}x{}'.format(450,60))
+            
+        if listItem in itemList:
+            itemList.remove(listItem)
         else:
             window = tk.Toplevel()
             window.resizable(width=FALSE,height=FALSE)

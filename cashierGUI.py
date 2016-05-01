@@ -5,6 +5,7 @@ root = tk.Tk()
 root.wm_title("Cashier")
 
 from myToolPOS import *
+#import myToolPOS
 
 root.resizable(width=FALSE,height=FALSE) #Allows for non-expandable window 
 
@@ -39,6 +40,22 @@ def getUPCNum():
         errorChecking()
     else:
         connectTools.newMakeSale(number)
+        #might need to eventually put readList here
+        readList()
+
+def readList():
+    current = ""
+    if len(itemList) == 0:
+        itemLabel = Label(root, text="                                                                           ",padx=1)
+        itemLabel.config(font=("Helvetica",10))
+        itemLabel.place(x=279 , y=70)
+    else:
+        for item in itemList:
+            current += str(item) + "\n"
+        itemLabel = Label(root, text=current,padx=1)
+        itemLabel.config(font=("Helvetica",10))
+        itemLabel.place(x=279 , y=70)
+       
 
 def removeItem():
     """The window that appears when you click 'Void Item.' This asks for a UPC code to remove."""
@@ -66,6 +83,8 @@ def removeItem():
 
             def removeCode():
                 connectTools.voidItem(removeNumber)
+                readList()
+                
             
             def windowDone():
                 """Exits out of the window when user clicks 'NO' after entering UPC code
@@ -93,12 +112,8 @@ def removeSale():
     
     def deleteSale():
         connectTools.voidSale()
-        window = tk.Toplevel()
-        window.resizable(width=FALSE,height=FALSE)
-        label = Label(window,text="Success!",font="Helvetica 13 bold")
-        label.pack(side="top",fill="both",padx=10,pady=10)
-        window.after(3000, lambda: window.destroy())
-        window.geometry('{}x{}'.format(180,60))
+        done()
+        os.system("cashierGUI.py")
 
     def windowDone():
         """Exits out of the window when user clicks 'NO' after entering UPC code
@@ -159,7 +174,7 @@ clickPayNow = Label(root,text="Click\n Pay Now!",font="Helvetica 12")
 clickPayNow.place(x=192,y=380)
 
 #The labels that display the quantity and price of an item
-qtyLabel = Label(root,text="Qty #",font="Helvetica 16 bold",relief=RIDGE,
+qtyLabel = Label(root,text="UPC",font="Helvetica 16 bold",relief=RIDGE,
                  width=7)
 qtyLabel.place(x=274,y=1)
 itemLabel = Label(root,text="Item",font="Helvetica 16 bold",relief=RIDGE,
