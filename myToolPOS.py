@@ -235,12 +235,12 @@ class connectTools:
         if item != None:
             itemList.append(tuple([itemID, item[11], item[9]]))
         else:
-                window = tk.Toplevel()
-                window.resizable(width=FALSE,height=FALSE)
-                label = Label(window,text="The UPC code you entered was not found in the database!",font="Helvetica 13 bold")
-                label.pack(side="top",fill="both",padx=10,pady=10)
-                window.after(3000, lambda: window.destroy())
-                window.geometry('{}x{}'.format(280,60))
+            window = tk.Toplevel()
+            window.resizable(width=FALSE,height=FALSE)
+            label = Label(window,text="The UPC code you entered was not found in the database!",font="Helvetica 13 bold")
+            label.pack(side="top",fill="both",padx=10,pady=10)
+            window.after(3000, lambda: window.destroy())
+            window.geometry('{}x{}'.format(280,60))
 
     def voidItem(itemID):
         global itemList
@@ -250,7 +250,13 @@ class connectTools:
             if listItem in itemList:
                 itemList.remove(listItem)
             else:
-                showerror("Error", "UPC code not found in cart")
+                #showerror("Error", "UPC code not found in cart")
+                window = tk.Toplevel()
+                window.resizable(width=FALSE,height=FALSE)
+                label = Label(window,text="The UPC code you entered was not found in the cart!",font="Helvetica 13 bold")
+                label.pack(side="top",fill="both",padx=10,pady=10)
+                window.after(3000, lambda: window.destroy())
+                window.geometry('{}x{}'.format(280,60))
             
     def voidSale():
         global itemList
