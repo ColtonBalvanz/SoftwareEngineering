@@ -45,35 +45,39 @@ def getUPCNum():
         label.pack(side="top",fill="both",padx=10,pady=10)
         window.after(3000, lambda: window.destroy())
         window.geometry('{}x{}'.format(180,60))
-    
-#def removed():
-    #Use Colton's code when user clicks yes
-
-def verifyRemove():
-    """This window appears after UPC code has been entered for verification"""
-    window=tk.Toplevel()
-    window.resizable(width=FALSE,height=FALSE)
-    verifyLabel = Label(window,text="Are you sure you want to remove this item?",
-                        font="Helvetica 10 bold")
-    verifyLabel.pack(side="top",fill="both",padx=10,pady=10)
-    yesButton = Button(window,text="YES",width=10)#command=removed)
-    yesButton.place(x=40,y=55)
-    
-    def windowDone():
-        """Exits out of the window when user clicks 'NO'"""
-        window.destroy()
-        
-    noButton = Button(window,text="NO",width=10,command=windowDone)
-    noButton.place(x=190,y=55)
-    window.geometry('{}x{}'.format(310,90))
 
 def removeItem():
     """The window that appears when you click 'Void Item.' This asks for a UPC code to remove."""
     window = tk.Toplevel()
     window.title("Void Item")
     window.resizable(width=FALSE,height=FALSE)
+        
     removeLabel = Label(window,text="Enter UPC number to remove:",font="Helvetica 10 bold")
     removeLabel.pack(side="top")
+
+    def verifyRemove():
+        """This window appears after UPC code has been entered for verification"""
+        removeNumber = (Entry.get(removeUPC))
+        if len(removeNumber) == 0:
+            errorChecking()
+        else:
+            window=tk.Toplevel()
+            window.resizable(width=FALSE,height=FALSE)
+            verifyLabel = Label(window,text="Are you sure you want to remove this item?",
+                                font="Helvetica 10 bold")
+            verifyLabel.pack(side="top",fill="both",padx=10,pady=10)
+            yesButton = Button(window,text="YES",width=10) #command needs to go here that'll use Colton's code
+            yesButton.place(x=40,y=55)
+            
+            def windowDone():
+                """Exits out of the window when user clicks 'NO' after entering UPC code
+                   to remove"""
+                window.destroy()
+
+            noButton = Button(window,text="NO",width=10,command=windowDone)
+            noButton.place(x=190,y=55)
+            window.geometry('{}x{}'.format(310,90))
+    
     removeUPC = Entry(window)
     removeUPC.pack(side="top",fill="both",padx=10,pady=10)
     UPCButton = Button(window,text="Enter",command=verifyRemove)
