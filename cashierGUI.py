@@ -83,8 +83,7 @@ def removeItem():
     UPCButton = Button(window,text="Enter",command=verifyRemove)
     UPCButton.pack(side="bottom")
     window.geometry('{}x{}'.format(290,90))
-    
-    
+        
 #Buttons that are placed on right hand side of window
 exButton = Button(root,text="Exit",command=done,width=12,height=6,bg="red",
                   font="Helvetica 15 bold")

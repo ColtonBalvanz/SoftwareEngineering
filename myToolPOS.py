@@ -1,3 +1,4 @@
+import tkinter as tk
 import sys
 import pprint
 import psycopg2
@@ -20,7 +21,7 @@ ALIGN_CENTER = xlwt.easyxf("align: horiz center")
 BOLDED_CENTER = xlwt.easyxf("align: horiz center; font: bold on")
 MONEY_FORMAT = xlwt.easyxf(num_format_str = '$#,##0.00')
 REMOVE_SCIENTIFIC = xlwt.easyxf(num_format_str = '0')
-
+itemList = list()
 
 
 class connectTools:
@@ -44,7 +45,7 @@ class connectTools:
     subTotal = 0
     salesTax = 0
     inputIDlist = list()
-    itemList = list()
+   # itemList = list()
     
     def connect():
 ##The connect method opens the initial connection to the server. To
@@ -240,7 +241,7 @@ class connectTools:
             label = Label(window,text="The UPC code you entered was not found in the database!",font="Helvetica 13 bold")
             label.pack(side="top",fill="both",padx=10,pady=10)
             window.after(3000, lambda: window.destroy())
-            window.geometry('{}x{}'.format(280,60))
+            window.geometry('{}x{}'.format(480,60))
 
     def voidItem(itemID):
         global itemList
@@ -249,14 +250,13 @@ class connectTools:
             listItem = tuple([itemID, item[11], item[9]])
             if listItem in itemList:
                 itemList.remove(listItem)
-            else:
-                #showerror("Error", "UPC code not found in cart")
-                window = tk.Toplevel()
-                window.resizable(width=FALSE,height=FALSE)
-                label = Label(window,text="The UPC code you entered was not found in the cart!",font="Helvetica 13 bold")
-                label.pack(side="top",fill="both",padx=10,pady=10)
-                window.after(3000, lambda: window.destroy())
-                window.geometry('{}x{}'.format(280,60))
+        else:
+            window = tk.Toplevel()
+            window.resizable(width=FALSE,height=FALSE)
+            label = Label(window,text="The UPC code you entered was not found in the cart!",font="Helvetica 13 bold")
+            label.pack(side="top",fill="both",padx=10,pady=10)
+            window.after(3000, lambda: window.destroy())
+            window.geometry('{}x{}'.format(450,60))
             
     def voidSale():
         global itemList
