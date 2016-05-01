@@ -14,6 +14,7 @@ counter = 1
 BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre;")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
+GENERATE_DAILY_REPORT_NAME = "Daily_Operations_Report" +str(time.strftime("%m-%d-%Y"))
 ALIGN_RIGHT = xlwt.easyxf("align: horiz right")
 ALIGN_CENTER = xlwt.easyxf("align: horiz center")
 BOLDED_CENTER = xlwt.easyxf("align: horiz center; font: bold on")
@@ -295,7 +296,6 @@ class connectTools:
         global MONEY_FORMAT
         global ALIGN_CENTER
         rowIndex = 3
-        colIndex = 0
         records = connectTools.query('inventory', '*')
 
         COLUMN_HEADINGS = [("Item ID"), ("Item Name"),
@@ -323,8 +323,27 @@ class connectTools:
             column.width = 256*25
         report.save(GENERATE_WORTH_NAME + '.xls')
         os.system("start " + GENERATE_WORTH_NAME + '.xls')
+
+    def generateDailyReport():
+        global GENERATE_DAILY_REPORT_NAME
+        global DATE_CELL
+        records = connectTools.query('sales', '*')
+            
+        COLUMN_HEADINGS = [("Sales Today"), ("Sales Yesterday"),
+                           ("Profit Today"), ("Profit Yesterday")]
+        report = xlwt.Workbook()
+        dailyOperations = report.add_sheet(GENERATE_DAILY_REPORT_NAME)
+        dailyOperations.write_merge(0, 1, 0, 4, GENERATE_DAILY_REPORT_NAME,
+                                    BRAND_CELL)
+        for x in range(0, len(COLUMN_HEADINGS)):
+            dailyOperations.write(2,x, COLUMN_HEADINGS[x], BOLDED_CENTER)
+
+        report.save(GENERATE_DAILY_REPORT_NAME+ '.xls')
+        os.system("start " + GENERATE_DAILY_REPORT_NAME + '.xls')
         
 
+        
+    
 
     def decrement(subtract, itemID):
 ##decrement() changes the quantity of an item in a database. There is
