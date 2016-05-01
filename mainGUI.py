@@ -18,12 +18,23 @@ def done():
     root.destroy()
 
 def cashGUI():
+    """Opens cashier GUI"""
     os.system("cashierGUI.py")
+
+def notImplemented():
+    """For features that have not yet been implemented"""
+    window = tk.Toplevel()
+    window.resizable(width=FALSE,height=FALSE)
+    label = tk.Label(window,text="This feature has yet to be implemented.",
+                     font="Helvetica 10 bold")
+    label.pack(side="top",fill="both",padx=10,pady=10)
         
 #This block of code is what creates the buttons for each label
-modSales = Button(root,text="Modify Sales",width=15,height=2,bg="#c2d6d6")
+modSales = Button(root,text="Modify Sales",width=15,height=2,bg="#c2d6d6",
+                  command=notImplemented)
 modSales.place(relx=.17, rely=.18, anchor="c")
-viewAudits = Button(root,text="View Audits",width=15,height=2,bg="#c2d6d6")
+viewAudits = Button(root,text="View Audits",width=15,height=2,bg="#c2d6d6",
+                    command=notImplemented)
 viewAudits.place(relx=.17, rely=.45, anchor="c")
 genDaily = Button(root,text="Generate Daily",width=15,height=2,bg="#c2d6d6")
 genDaily.place(relx=.17, rely=.72, anchor="c")
