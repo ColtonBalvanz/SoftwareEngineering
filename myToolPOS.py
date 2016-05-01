@@ -10,8 +10,7 @@ from tkinter import *
 import os
 
 
-
-counter = 0
+counter = 1
 BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre;")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
@@ -22,6 +21,7 @@ MONEY_FORMAT = xlwt.easyxf(num_format_str = '$#,##0.00')
 REMOVE_SCIENTIFIC = xlwt.easyxf(num_format_str = '0')
 
 
+
 class connectTools:
 ##These are some of the variables that will be reused often throughout
 ##this class. conn is our variable for the connection called by many of
@@ -30,6 +30,7 @@ class connectTools:
 ##parsed version of the string to work with establishing the connection.
 ##The cursor is a tool that will make modifications to the tables in our
 ##database.
+
 
     conn = None
     server_info = None
@@ -42,6 +43,7 @@ class connectTools:
     subTotal = 0
     salesTax = 0
     inputIDlist = list()
+    itemList = list()
     
     def connect():
 ##The connect method opens the initial connection to the server. To
@@ -88,8 +90,11 @@ class connectTools:
             global dateString
             global counter
             dateString = str(time.strftime("%Y%m%d"))
-            ticketID = dateString + str(counter)
-    ##          print(ticketID)
+            #ticketID = dateString + str(counter)
+            ticketID = dateString + "000"
+            print("1: ", ticketID)
+            ticketID = int(ticketID) + counter
+            print("2: ", str(ticketID))
             if int(ticketID) <= int(current[0]):
                 print("Adjusting the counter...")
                 counter+=1
@@ -230,7 +235,21 @@ class connectTools:
         if item != None:
             return tuple([itemID, item[11], item[9]])
         else:
-           return tuple([None, None, None])
+            return tuple([None, None, None])
+
+    def voidItem(itemID):
+        global itemList
+        item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
+        if item != None:
+            listItem = tuple([itemID, item[11], item[9]])
+            if listItem in itemList:
+                itemList.remove(listItem)
+            else:
+                showerror("Error", "UPC code not found in cart")
+            
+    def voidSale():
+        global itemList
+        itemList = list()
 
 
     def generateReceipt(itemNames, itemPrices, subTotal, salesTax):
