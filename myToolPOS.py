@@ -3,6 +3,7 @@ import sys
 import pprint
 import psycopg2
 from psycopg2.extensions import AsIs
+from datetime import timedelta
 import urllib.parse
 import time
 import xlwt
@@ -15,7 +16,7 @@ counter = 1
 BRAND_CELL = xlwt.easyxf("font: bold on; align: horiz center, vert centre;")
 DATE_CELL = xlwt.easyxf(num_format_str='MM-DD-YYYY')
 GENERATE_WORTH_NAME = "Worth_Report_" + str(time.strftime("%m-%d-%Y"))
-GENERATE_DAILY_REPORT_NAME = "Daily_Operations_Report" +str(time.strftime("%m-%d-%Y"))
+GENERATE_DAILY_REPORT_NAME = "Daily_Operations_Report_" + str(time.strftime("%m-%d-%Y"))
 ALIGN_RIGHT = xlwt.easyxf("align: horiz right")
 ALIGN_CENTER = xlwt.easyxf("align: horiz center")
 BOLDED_CENTER = xlwt.easyxf("align: horiz center; font: bold on")
@@ -124,6 +125,15 @@ class connectTools:
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
         return cursor.fetchone()
+
+    def query_multi(table, column, args):
+##This is helpful for when we want to look up an item more specifically.
+##We can look up the price from a barcode and other related columns
+##prior to making a sale.
+        
+        global cursor
+        cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
+        return cursor.fetchall()
 
     def modify_single(table, operation, location):
 ##modify_single will do the work of subtracting a number of items from a
@@ -307,8 +317,8 @@ class connectTools:
         sale.write_merge(7+len(itemNames), 7+len(itemNames), 4, 5, str((salesTax+subTotal)/100), ALIGN_RIGHT)
         sale.write_merge(8+len(itemNames), 8+len(itemNames), 0, 5, "Thanks for shopping at My Tool!", ALIGN_RIGHT)
         sale.write_merge(9+len(itemNames), 9+len(itemNames), 0, 5, "Have a great day!", ALIGN_CENTER)
-        receipt.save('Customer_receipt_' + ticketID+'.xls')
-        os.system("start Customer_receipt_" + ticketID+ '.xls')
+        receipt.save('Customer_receipt_' + str(ticketID)+'.xls')
+        os.system("start Customer_receipt_" + str(ticketID)+ '.xls')
 
     def generateWorth():
         global GENERATE_WORTH_NAME
@@ -347,17 +357,31 @@ class connectTools:
     def generateDailyReport():
         global GENERATE_DAILY_REPORT_NAME
         global DATE_CELL
-        records = connectTools.query('sales', '*')
-            
+        yesterdays_date = ((datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + "000")
+        todays_date = str(time.strftime("%Y%m%d")) + "000"
+        sales_today = 0
+        sales_yesterday = 0
+        today = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id >= " + todays_date))
+        yesterday = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id BETWEEN " + yesterdays_date + " AND " + todays_date))
+        print(yesterday)
         COLUMN_HEADINGS = [("Sales Today"), ("Sales Yesterday"),
                            ("Profit Today"), ("Profit Yesterday")]
         report = xlwt.Workbook()
-        dailyOperations = report.add_sheet(GENERATE_DAILY_REPORT_NAME)
-        dailyOperations.write_merge(0, 1, 0, 4, GENERATE_DAILY_REPORT_NAME,
+        dailyOperations = report.add_sheet("Worksheet")
+        dailyOperations.write_merge(0, 1, 0, 3, GENERATE_DAILY_REPORT_NAME,
                                     BRAND_CELL)
         for x in range(0, len(COLUMN_HEADINGS)):
             dailyOperations.write(2,x, COLUMN_HEADINGS[x], BOLDED_CENTER)
+            column = dailyOperations.col(x)
+            column.width = 256*25
 
+        for x in range (0, len(today[2])):
+            sales_today += (int(today[2][x]))
+        for x in range(0, len(yesterday[2])):
+            sales_yesterday +=(int(yesterday[2][x]))
+            ##print(sales_today)
+        dailyOperations.write(3,0, (sales_today/100), MONEY_FORMAT)
+        dailyOperations.write(3,1, (sales_yesterday/100), MONEY_FORMAT)
         report.save(GENERATE_DAILY_REPORT_NAME+ '.xls')
         os.system("start " + GENERATE_DAILY_REPORT_NAME + '.xls')
         
@@ -401,6 +425,7 @@ class connectTools:
                     else:
                         individual_item += character
                         #print(individual_item)
+        #print(newList)
         return newList    
     
 
@@ -447,7 +472,8 @@ def main():
     if connectTools.connect()==True:
         print("The connection was a success!")
         #connectTools.makeSale()
-        connectTools.generateWorth()
+        connectTools.generateDailyReport()
+        #print(connectTools.query_multi('sales', '*', "sale_id >= " + str(time.strftime("%Y%m%d")) + "000"))
         connectTools.disconnect()
     else:
         print("Whoops! I can't connect!")
