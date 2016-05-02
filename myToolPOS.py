@@ -361,6 +361,8 @@ class connectTools:
         todays_date = str(time.strftime("%Y%m%d")) + "000"
         sales_today = 0
         sales_yesterday = 0
+        profit_today = 0
+        profit_yesterday = 0
         today = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id >= " + todays_date))
         yesterday = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id BETWEEN " + yesterdays_date + " AND " + todays_date))
         print(yesterday)
@@ -377,11 +379,15 @@ class connectTools:
 
         for x in range (0, len(today[2])):
             sales_today += (int(today[2][x]))
+            profit_today += connectTools.query_single("inventory", "cost", "item_id = " + str(today[1][x]))[0]
         for x in range(0, len(yesterday[2])):
             sales_yesterday +=(int(yesterday[2][x]))
+            profit_yesterday += connectTools.query_single("inventory", "cost", "item_id = " + str(yesterday[1][x]))[0]
             ##print(sales_today)
         dailyOperations.write(3,0, (sales_today/100), MONEY_FORMAT)
         dailyOperations.write(3,1, (sales_yesterday/100), MONEY_FORMAT)
+        dailyOperations.write(3,2, (sales_today-profit_today)/100, MONEY_FORMAT)
+        dailyOperations.write(3,3, (sales_yesterday-profit_yesterday)/100, MONEY_FORMAT)
         report.save(GENERATE_DAILY_REPORT_NAME+ '.xls')
         os.system("start " + GENERATE_DAILY_REPORT_NAME + '.xls')
         
