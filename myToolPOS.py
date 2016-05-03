@@ -127,9 +127,9 @@ class connectTools:
         return cursor.fetchone()
 
     def query_multi(table, column, args):
-##This is helpful for when we want to look up an item more specifically.
-##We can look up the price from a barcode and other related columns
-##prior to making a sale.
+##This method was created to return multiple rows from the database. It
+##is ideally used to generate reports between different sets of days. It
+##is more useful than a plain query.
         
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
@@ -321,6 +321,10 @@ class connectTools:
         os.system("start Customer_receipt_" + str(ticketID)+ '.xls')
 
     def generateWorth():
+##This single method generates the worth of the current inventory. It
+##lists out what is currently in the inventory, how many are in stock,
+##and what the total worth is for each type of item.
+
         global GENERATE_WORTH_NAME
         global DATE_CELL
         global MONEY_FORMAT
@@ -355,6 +359,13 @@ class connectTools:
         os.system("start " + GENERATE_WORTH_NAME + '.xls')
 
     def generateDailyReport():
+##Generate worth is still incomplete. It can generate daily reports from
+##the current day and yesterday, but only if sales were made on both of
+##the days. For testing, I had to check sales from 3 days before,
+##because we hadn't populated it with sales for some days. It is also
+##not as specific as we planned. It is a very powerful method, but the
+##report could include more details. It grabs data from both the sales
+##table, and the inventory table to form a complete report.
         global GENERATE_DAILY_REPORT_NAME
         global DATE_CELL
         yesterdays_date = ((datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + "000")
@@ -393,6 +404,15 @@ class connectTools:
         
 
     def parse_list(alist):
+##This parse list method is specifically called for making the daily
+##reports. It has a very specific function and has many limitations. The
+##lists that were sent to the database did not have the same structure
+##when we pulled them back from the database. So we had to clean them up
+##before we could use the data provided. It takes a list of lists as an
+##argument and seperates the initial list into sale IDs, then it
+##combines all the items sold in that day, and lastly it combines all
+##the sale prices. So the end result is the same thing, but it is easier
+##to read in Python.
         newList = list()
         item_ids = list()
         item_prices = list()
@@ -479,7 +499,6 @@ def main():
         print("The connection was a success!")
         #connectTools.makeSale()
         connectTools.generateDailyReport()
-        #print(connectTools.query_multi('sales', '*', "sale_id >= " + str(time.strftime("%Y%m%d")) + "000"))
         connectTools.disconnect()
     else:
         print("Whoops! I can't connect!")
