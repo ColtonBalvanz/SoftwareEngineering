@@ -11,6 +11,7 @@ root.resizable(width=FALSE,height=FALSE) #Makes the window nonexpandable
 
 #Sets 'My Tool' label at top center of label
 myLabel = Label(root,text="My Tool",font="Helvetica 25 bold").pack()
+connected = False
 
 
 def done():
@@ -20,6 +21,14 @@ def done():
 def cashGUI():
     """Opens cashier GUI"""
     os.system("cashierGUI.py")
+
+##def generateReport():
+##    global connected
+##    if connected == False:
+##        connected = connectTools.connect()
+##        connectTools.generateDailyReport()
+##    else:
+##        connectTools.generateDailyReport()
 
 def notImplemented():
     """For features that have not yet been implemented"""

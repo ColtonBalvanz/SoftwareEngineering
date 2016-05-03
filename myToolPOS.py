@@ -376,7 +376,7 @@ class connectTools:
         profit_yesterday = 0
         today = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id >= " + todays_date))
         yesterday = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id BETWEEN " + yesterdays_date + " AND " + todays_date))
-        print(yesterday)
+        ##print(yesterday)
         COLUMN_HEADINGS = [("Sales Today"), ("Sales Yesterday"),
                            ("Profit Today"), ("Profit Yesterday")]
         report = xlwt.Workbook()
@@ -420,38 +420,24 @@ class connectTools:
         newList.append(sale_ids)
         newList.append(item_ids)
         newList.append(item_prices)
-        #print(newList)
         individual_item = ""
         for row in range(0,len(alist)):
-            print(row)
             newList[0].append(alist[row][0])
-            #print(newList[0])
             for index in range(1,3):
                 individual_item = ""
                 for character in alist[row][index]:
-                    #if alist[row][index][character] == ',':
                     if character == ',':
                         newList[index].append(individual_item)
                         individual_item = ""
-                        #print(newList)
-                    #elif alist[row][index][character] == '{':
                     elif character == '{':
-                        #print("Begin list")
                         pass
-                    #elif alist[row][index][character] == '}':
                     elif character == '}':
                         newList[index].append(individual_item)
-                        #individual_item = ""
-                        #print("End list")
                         pass
-                    #elif alist[row][index][character] == ' ':
                     elif character == ' ':
-                        #print("A space")
                         pass
                     else:
                         individual_item += character
-                        #print(individual_item)
-        #print(newList)
         return newList    
     
 
