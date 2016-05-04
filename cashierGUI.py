@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import *
+from myToolPOS import *
 
 root = tk.Tk()
 root.wm_title("Cashier")
 
-from myToolPOS import *
 #import myToolPOS
 
 root.resizable(width=FALSE,height=FALSE) #Allows for non-expandable window 
@@ -16,12 +16,16 @@ def done():
     root.destroy()
 
 def errorChecking():
+    """This runs when the user has not inputted a UPC code"""
     window = tk.Toplevel()
     window.resizable(width=FALSE,height=FALSE)
     label = Label(window,text="You must input a UPC code!",font="Helvetica 13 bold")
     label.pack(side="top",fill="both",padx=10,pady=10)
-    window.after(3000, lambda: window.destroy())
+    window.after(4000, lambda: window.destroy())
     window.geometry('{}x{}'.format(280,60))
+
+def paySale():
+    connectTools.endSale() 
 
 def implement():
     """For buttons that were not yet implemented"""
@@ -44,6 +48,7 @@ def getUPCNum():
         readList()
 
 def readList():
+    """Places receipt list on cashier GUI"""
     current = ""
     if len(itemList) == 0:
         itemLabel = Label(root, text="                                                                           ",padx=1)
@@ -82,15 +87,16 @@ def removeItem():
             verifyLabel.pack(side="top",fill="both",padx=10,pady=10)
 
             def removeCode():
+                """Removes an item from their sale list"""
                 connectTools.voidItem(removeNumber)
-                readList()
-                
+                readList()         
             
             def windowDone():
                 """Exits out of the window when user clicks 'NO' after entering UPC code
                    to remove"""
                 window.destroy()
                 
+            #Needs to be placed here so nested functions will properly run   
             yesButton = Button(window,text="YES",width=10,command=removeCode)
             yesButton.place(x=40,y=55)   
 
@@ -98,12 +104,13 @@ def removeItem():
             noButton.place(x=190,y=55)
             window.geometry('{}x{}'.format(310,90))
     
-
+    #Needs to be placed here so nested functions will properly run
     UPCButton = Button(window,text="Enter",command=verifyRemove)
     UPCButton.pack(side="bottom")
     window.geometry('{}x{}'.format(290,90))
 
 def removeSale():
+    """Window that appears when the user wants to remove a sale"""
     window=tk.Toplevel()
     window.resizable(width=FALSE,height=FALSE)
     verifyLabel = Label(window,text="Are you sure you want to remove this sale?",
@@ -111,6 +118,8 @@ def removeSale():
     verifyLabel.pack(side="top",fill="both",padx=10,pady=10)
     
     def deleteSale():
+        """Appears after user confirms deletion of sale. New cashier window
+           opens"""
         connectTools.voidSale()
         done()
         os.system("cashierGUI.py")
@@ -120,6 +129,7 @@ def removeSale():
         to remove"""
         window.destroy()
         
+    #Needs to be placed here so nested functions will properly run
     yesButton = Button(window,text="YES",width=10,command=deleteSale)
     yesButton.place(x=40,y=55)
     noButton = Button(window,text="NO",width=10,command=windowDone)
@@ -140,7 +150,7 @@ voidSale.place(relx=.91,rely=.42,anchor="c")
 voidItem = Button(root,text="Void Item",command=removeItem,width=12,height=3,bg="#c2d6d6",
                   font="Helvetica 15 bold")
 voidItem.place(relx=.91,rely=.59,anchor="c")
-payNow = Button(root,text="Pay Now!",width=12,height=6,bg="#00ff00",
+payNow = Button(root,text="Pay Now!",command=paySale,width=12,height=6,bg="#00ff00",
                 font="Helvetica 15 bold")
 payNow.place(relx=.91,rely=.835,anchor="c")
 
@@ -164,14 +174,14 @@ UPCEntry.place(x=55,y=468)
 totalLabel = Label(root,text="Total:",font="Helvetica 18 bold",relief=GROOVE,
                    width=12,height=5,anchor='nw')
 totalLabel.place(x=1,y=310)
-totalEntry = Entry(root,width=13)
-totalEntry.place(x=189,y=313)
+#totalEntry = Entry(root,width=13)
+#totalEntry.place(x=189,y=313)
 taxLabel = Label(root,text="Sales Tax:",font="Helvetica 18")
 taxLabel.place(x=1,y=355)
-taxEntry = Entry(root,width=13)
-taxEntry.place(x=189,y=360)
-clickPayNow = Label(root,text="Click\n Pay Now!",font="Helvetica 12")
-clickPayNow.place(x=192,y=380)
+#taxEntry = Entry(root,width=13)
+#taxEntry.place(x=189,y=360)
+#clickPayNow = Label(root,text="Click\n Pay Now!",font="Helvetica 12")
+#clickPayNow.place(x=192,y=380)
 
 #The labels that display the quantity and price of an item
 qtyLabel = Label(root,text="UPC",font="Helvetica 16 bold",relief=RIDGE,

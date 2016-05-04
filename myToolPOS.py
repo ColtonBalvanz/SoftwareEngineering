@@ -34,7 +34,11 @@ class connectTools:
        The cursor is a tool that will make modifications to the tables in our
        database."""
 
-
+    global itemList
+    global ticketID
+    global itemNames
+    global itemIDs
+    global itemPrices
     conn = None
     server_info = None
     url = None
@@ -46,6 +50,7 @@ class connectTools:
     subTotal = 0
     salesTax = 0
     inputIDlist = list()
+    itemIDs = list()
    # itemList = list()
     
     def connect():
@@ -303,6 +308,30 @@ class connectTools:
         global itemList
         itemList = list()
 
+    def endSale():
+        """Used when the user clicks Pay Now!"""
+        for item in itemList:
+            itemIDs.append(item[0])
+            itemNames.append(item[1])
+            itemPrices.append(item[2])
+        sale = list([ticketID, itemIDs, itemPrices])
+        if connectTools.add_sale(sale)==False:
+            window = tk.Toplevel()
+            window.resizable(width=FALSE,height=FALSE)
+            label = Label(window,text="The system was unable to submit the sale to the sales database. \
+    \nPlease contact IT for more information.",font="Helvetica 13 bold")
+            label.pack(side="top",fill="both",padx=10,pady=10)
+            window.after(3000, lambda: window.destroy())
+            window.geometry('{}x{}'.format(480,60))
+        for itemID in itemIDs:
+            connectTools.decrement(1, itemID)
+        window = tk.Toplevel()
+        window.resizable(width=FALSE,height=FALSE)
+        label = Label(window,text="Sale completed!",font="Helvetica 13 bold")
+        label.pack(side="top",fill="both",padx=10,pady=10)
+        window.after(3000, lambda: window.destroy())
+        window.geometry('{}x{}'.format(480,60))
+
 
     def generateReceipt(itemNames, itemPrices, subTotal, salesTax):
         """This new method relies on being called from makeSale(). It takes two
@@ -505,7 +534,7 @@ def main():
     if connectTools.connect()==True:
         print("The connection was a success!")
         #connectTools.makeSale()
-        connectTools.generateDailyReport()
+        ##connectTools.generateDailyReport()
         connectTools.disconnect()
     else:
         print("Whoops! I can't connect!")
