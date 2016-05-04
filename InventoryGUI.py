@@ -2,20 +2,40 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from myToolPOS import connectTools
+from psycopg2.extensions import AsIs
 
 inventory = None
 table_data = None
+main = None
+root = None
+button_panel = None
+connected = False
 
+def close():
+    global root
+    connectTools.disconnect()
+    root.destroy()
+
+def refresh():
+    global connected
+    if connected == True:
+        table_data = connectTools.query("inventory", "*")
+    else:
+        connected = connectTools.connect()
+        table_data = connectTools.query("inventory", "*")
 
 def createWindow():
     global inventory
-    if connectTools.connect() == True:
-        print("Successfully connected to the database!")
+    global root
+    global main
+    global button_panel
+    global table_data
+    global connected
+    if connected == True:
         table_data = connectTools.query("inventory", "*")
-        ##print(table_data)
-        connectTools.disconnect()
     else:
-        print("Connection was a failure!")
+        connected = connectTools.connect()
+        table_data = connectTools.query("inventory", "*")
     columns = ("item_id", "quantity", "category", "price", "cost",
                             "desired_quantity", "sale", "sale_start", "sale_end",
                             "sale_price" , "supplier")
@@ -28,27 +48,76 @@ def createWindow():
     root.wm_title("Modify Inventory")
     root.resizable(width=FALSE, height=FALSE)
     root.geometry('{}x{}'.format(950,600))#Size of the window
-    inventory = ttk.Treeview(root, columns=(columns), show="headings")
-    ##inventory.Scrollable = True;
+    main = tk.Frame(root)
+    main.grid(sticky="nesw")
+    main.columnconfigure(0,weight=1)
+    main.rowconfigure(0,weight=1)
+    button_panel = tk.Frame(root)
+    button_panel.grid(row=0, column=1)
+    inventory = ttk.Treeview(main, columns=(columns), show="headings")
     inventory["columns"] = columns
     for headings in range(0,len(proper_columns)):
         inventory.heading(headings, text=proper_columns[headings])
         inventory.column(columns[headings], width=proper_widths[headings])
     for row in range(0, len(table_data)):
         inventory.insert("", row, values=table_data[row])
-    ##inventory.insert("","end", values = ())
-    inventory.grid()
-    inventory.bind('<ButtonRelease-1>', selectItem)
+    ##xsb = ttk.Scrollbar(inventory, orient='horizontal', command=inventory.xview)
+    ##xsb.grid(row=1, column=1, sticky='ew')
+    inventory.grid(row=0, column=0, sticky='ns')
+    ##ysb = ttk.Scrollbar(inventory, orient='vertical', command=inventory.yview)
+    add = tk.Button(button_panel, text="Add", command=addItem, width=17, height=10)
+    add.grid(row=0, column=0, columnspan=1, rowspan=1)
+    modify = tk.Button(button_panel, text="Modify", command=modifyItem, width=17, height=10)
+    modify.grid(row=1, column=0, columnspan=1, rowspan=1)
+    close = tk.Button(button_panel, text="Exit", command=root.destroy, width=17, height=10)
+    close.grid(row=2, column=0, columnspan=1, rowspan=1)
+    ##inventory.bind('<ButtonRelease-1>', selectItem)
     ##root.grid(10, 10, 5, 5)
     root.mainloop()
 
-def selectItem(a):
+def modifyItem():
     global inventory
     curItem = inventory.focus()
-    print(inventory.item(curItem))
+    window = tk.Toplevel()
+    window.title("Modify Item")
+    window.resizable(width=FALSE, height=FALSE)
+    modifyLabel = Label(window, text="What would you like to change?")
+    modifyLabel.pack(side="top")
+    otherLabel= Label(window, text=inventory.item(curItem).get('values'))
+    otherLabel.pack()
 
-def close():
-    root.destroy()
+def addItem():
 
-##def modifyrow():
+    COLUMN_LABELS = ["Item ID", "Quantity", "Category", "Price", "Cost",
+                      "Desired Quantity", "Sale?", "Sale Start Date", "Sale End Date",
+                      "Sale Price", "Supplier"]
+
+    def add():
+        stuff = list()
+        for column in COLUMN_LABELS:
+            stuff.append(entry.get[column].get())
+        print(stuff)
+    
+    entry = {}
+    label = {}
+    window = tk.Toplevel()
+    window.title("Add item")
+    window.resizable(width=FALSE, height=FALSE)
+    window.grid()
+    i = 0
+    for column in COLUMN_LABELS:
+        lb = Label(window, text=column)
+        lb.grid(row=0, column=i)
+        label[column] = lb
+        
+        e = Entry(window, width=15)
+        e.grid(row=1, column=i)
+        entry[column] = e
+        i += 1
+    blank = Label(window, text="")
+    blank.grid(row=0, column=len(COLUMN_LABELS))
+    submit = Button(window, text="Submit", command=add)
+    submit.grid(row=1, column=len(COLUMN_LABELS))
+
+
 createWindow()
