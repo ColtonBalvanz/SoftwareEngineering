@@ -26,13 +26,13 @@ itemList = list()
 
 
 class connectTools:
-##These are some of the variables that will be reused often throughout
-##this class. conn is our variable for the connection called by many of
-##the methods in this class. server_info is a string of the server
-##information stored in a text file outside of our code. The url is the
-##parsed version of the string to work with establishing the connection.
-##The cursor is a tool that will make modifications to the tables in our
-##database.
+    """These are some of the variables that will be reused often throughout
+       this class. conn is our variable for the connection called by many of
+       the methods in this class. server_info is a string of the server
+       information stored in a text file outside of our code. The url is the
+       parsed version of the string to work with establishing the connection.
+       The cursor is a tool that will make modifications to the tables in our
+       database."""
 
 
     conn = None
@@ -49,9 +49,9 @@ class connectTools:
    # itemList = list()
     
     def connect():
-##The connect method opens the initial connection to the server. To
-##close the connection, call disconnect() after calling connect(). The
-##connection will stay open to call other methods defined in this class.
+        """The connect method opens the initial connection to the server. To
+           close the connection, call disconnect() after calling connect(). The
+           connection will stay open to call other methods defined in this class."""
         
         try:
             global server_info
@@ -75,9 +75,8 @@ class connectTools:
             return False
 
     def disconnect():
-##This is called after connect(), and it should not be called before
-##connect().
-
+        """This is called after connect(), and it should not be called before
+           connect()."""
         try:
             global conn
             conn.close()
@@ -85,6 +84,8 @@ class connectTools:
             print("Sorry, I am not even connected right now.")
             
     def check_count():
+        """Checks if it can overwrite the current sale ID so a new sale can
+           take place"""
         global cursor
         cursor.execute("""SELECT MAX(sale_id) FROM sales;""")
         current = cursor.fetchone()
@@ -108,37 +109,37 @@ class connectTools:
             print("Counter looks good already!")
 
     def query(table, column):
-##This method allows the user to query which table to access and which
-##column in the table. It may be useful, but query_single is more
-##useful. It has the ability to display the whole contents of the table
-##at half the expense of query_single.
+        """This method allows the user to query which table to access and which
+           column in the table. It may be useful, but query_single is more
+           useful. It has the ability to display the whole contents of the table
+           at half the expense of query_single."""
 
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s""", {"table": AsIs(table), "column": AsIs(column)})
         return cursor.fetchall()
 
     def query_single(table, column, args):
-##This is helpful for when we want to look up an item more specifically.
-##We can look up the price from a barcode and other related columns
-##prior to making a sale.
+        """This is helpful for when we want to look up an item more specifically.
+           We can look up the price from a barcode and other related columns
+           prior to making a sale."""
         
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
         return cursor.fetchone()
 
     def query_multi(table, column, args):
-##This method was created to return multiple rows from the database. It
-##is ideally used to generate reports between different sets of days. It
-##is more useful than a plain query.
+        """This method was created to return multiple rows from the database. It
+           is ideally used to generate reports between different sets of days. It
+           is more useful than a plain query."""
         
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
         return cursor.fetchall()
 
     def modify_single(table, operation, location):
-##modify_single will do the work of subtracting a number of items from a
-##purchase, plus any updates we might have on updating a specific item,
-##such as updating a price or setting the sale of an item.
+        """modify_single will do the work of subtracting a number of items from a
+           purchase, plus any updates we might have on updating a specific item,
+           such as updating a price or setting the sale of an item."""
         
         global conn
         global cursor
@@ -151,8 +152,8 @@ class connectTools:
             return False
             
     def add_sale(row):
-##add_sale has the responsibility to add a row in the sales table, and
-##list items associated with that sale.
+        """add_sale has the responsibility to add a row in the sales table, and
+           list items associated with that sale."""
         
         global conn
         global cursor
@@ -168,12 +169,12 @@ class connectTools:
         
 
     def add_item(row):
-##add_item will add a new item to the inventory database. It will add
-##whatever new item My Tool chooses to carry in the store. It takes the
-##arguement of the values of that new row, which are the item_id, the
-##quantity, category of the item, price, cost, how many to keep in stock
-##regularly, whether the item is on sale or not, the sale start and end
-##dates, the sale price, and who supplies that item.
+        """add_item will add a new item to the inventory database. It will add
+           whatever new item My Tool chooses to carry in the store. It takes the
+           arguement of the values of that new row, which are the item_id, the
+           quantity, category of the item, price, cost, how many to keep in stock
+           regularly, whether the item is on sale or not, the sale start and end
+           dates, the sale price, and who supplies that item."""
 
         global conn
         global cursor
@@ -188,9 +189,9 @@ class connectTools:
             return False
 
     def makeSale():
-##The makeSale() method is responsible for producing the sale of a
-##customer. It will also print out a physical receipt the customer can
-##take with them.
+        """The makeSale() method is responsible for producing the sale of a
+           customer. It will also print out a physical receipt the customer can
+           take with them."""
         global counter
         global dateString
         global itemNames
@@ -241,6 +242,9 @@ class connectTools:
         connectTools.generateReceipt(itemNames, itemPrices, subTotal, salesTax)
 
     def newMakeSale(itemID):
+        """Occurs when user makes a new sale and also checks if the UPC code
+           entered is a valid UPC code"""
+        
         global itemList
         item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
         if item != None:
@@ -253,10 +257,12 @@ class connectTools:
             window.resizable(width=FALSE,height=FALSE)
             label = Label(window,text="The UPC code you entered was not found in the database!",font="Helvetica 13 bold")
             label.pack(side="top",fill="both",padx=10,pady=10)
-            window.after(3000, lambda: window.destroy())
+            window.after(4000, lambda: window.destroy())
             window.geometry('{}x{}'.format(480,60))
 
     def voidItem(itemID):
+        """This method checks for validity when the user wants to remove an item from their sale.
+           And if they input a valid UPC code, it will remove the item"""
         global itemList
         item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
         if item != None:
@@ -264,35 +270,46 @@ class connectTools:
                 listItem = tuple([itemID, item[11], item[9]])
             else:
                 listItem = tuple([itemID, item[11], item[3]])
+
+            if listItem in itemList:
+                itemList.remove(listItem)
+            else:
+                window = tk.Toplevel()
+                window.resizable(width=FALSE,height=FALSE)
+                label = Label(window,text="The UPC code you entered was not found in the cart!",font="Helvetica 13 bold")
+                label.pack(side="top",fill="both",padx=10,pady=10)
+                window.after(4000, lambda: window.destroy())
+                window.geometry('{}x{}'.format(450,60))
         else:
             window = tk.Toplevel()
             window.resizable(width=FALSE,height=FALSE)
             label = Label(window,text="The UPC code you entered was not found in the database!",font="Helvetica 13 bold")
             label.pack(side="top",fill="both",padx=10,pady=10)
-            window.after(3000, lambda: window.destroy())
-            window.geometry('{}x{}'.format(450,60))
+            window.after(4000, lambda: window.destroy())
+            window.geometry('{}x{}'.format(480,60))
             
-        if listItem in itemList:
-            itemList.remove(listItem)
-        else:
-            window = tk.Toplevel()
-            window.resizable(width=FALSE,height=FALSE)
-            label = Label(window,text="The UPC code you entered was not found in the cart!",font="Helvetica 13 bold")
-            label.pack(side="top",fill="both",padx=10,pady=10)
-            window.after(3000, lambda: window.destroy())
-            window.geometry('{}x{}'.format(450,60))
+##        if listItem in itemList:
+##            itemList.remove(listItem)
+##        else:
+##            window = tk.Toplevel()
+##            window.resizable(width=FALSE,height=FALSE)
+##            label = Label(window,text="The UPC code you entered was not found in the cart!",font="Helvetica 13 bold")
+##            label.pack(side="top",fill="both",padx=10,pady=10)
+##            window.after(3000, lambda: window.destroy())
+##            window.geometry('{}x{}'.format(450,80))
             
     def voidSale():
+        """This interacts with our GUI when the user wants to remove their sale"""
         global itemList
         itemList = list()
 
 
     def generateReceipt(itemNames, itemPrices, subTotal, salesTax):
-##This new method relies on being called from makeSale(). It takes two
-##lists, and two integer values to generate a receipt for the customer.
-##It prints out to an excel file with formatted numbers. This is the
-##best we have to make a receipt for the cashier. It launches the file
-##after it has been created so the customer can print the receipt.
+        """This new method relies on being called from makeSale(). It takes two
+           lists, and two integer values to generate a receipt for the customer.
+           It prints out to an excel file with formatted numbers. This is the
+           best we have to make a receipt for the cashier. It launches the file
+           after it has been created so the customer can print the receipt."""
         
         global ticketID
         global ALIGN_RIGHT
@@ -321,9 +338,9 @@ class connectTools:
         os.system("start Customer_receipt_" + str(ticketID)+ '.xls')
 
     def generateWorth():
-##This single method generates the worth of the current inventory. It
-##lists out what is currently in the inventory, how many are in stock,
-##and what the total worth is for each type of item.
+        """This single method generates the worth of the current inventory. It
+           lists out what is currently in the inventory, how many are in stock,
+           and what the total worth is for each type of item."""
 
         global GENERATE_WORTH_NAME
         global DATE_CELL
@@ -359,13 +376,14 @@ class connectTools:
         os.system("start " + GENERATE_WORTH_NAME + '.xls')
 
     def generateDailyReport():
-##Generate worth is still incomplete. It can generate daily reports from
-##the current day and yesterday, but only if sales were made on both of
-##the days. For testing, I had to check sales from 3 days before,
-##because we hadn't populated it with sales for some days. It is also
-##not as specific as we planned. It is a very powerful method, but the
-##report could include more details. It grabs data from both the sales
-##table, and the inventory table to form a complete report.
+        """Generate worth is still incomplete. It can generate daily reports from
+           the current day and yesterday, but only if sales were made on both of
+           the days. For testing, I had to check sales from 3 days before,
+           because we hadn't populated it with sales for some days. It is also
+           not as specific as we planned. It is a very powerful method, but the
+           report could include more details. It grabs data from both the sales
+           table, and the inventory table to form a complete report."""
+        
         global GENERATE_DAILY_REPORT_NAME
         global DATE_CELL
         yesterdays_date = ((datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + "000")
@@ -404,15 +422,16 @@ class connectTools:
         
 
     def parse_list(alist):
-##This parse list method is specifically called for making the daily
-##reports. It has a very specific function and has many limitations. The
-##lists that were sent to the database did not have the same structure
-##when we pulled them back from the database. So we had to clean them up
-##before we could use the data provided. It takes a list of lists as an
-##argument and seperates the initial list into sale IDs, then it
-##combines all the items sold in that day, and lastly it combines all
-##the sale prices. So the end result is the same thing, but it is easier
-##to read in Python.
+        """This parse list method is specifically called for making the daily
+           reports. It has a very specific function and has many limitations. The
+           lists that were sent to the database did not have the same structure
+           when we pulled them back from the database. So we had to clean them up
+           before we could use the data provided. It takes a list of lists as an
+           argument and seperates the initial list into sale IDs, then it
+           combines all the items sold in that day, and lastly it combines all
+           the sale prices. So the end result is the same thing, but it is easier
+           to read in Python."""
+        
         newList = list()
         item_ids = list()
         item_prices = list()
@@ -442,8 +461,9 @@ class connectTools:
     
 
     def decrement(subtract, itemID):
-##decrement() changes the quantity of an item in a database. There is
-##not much important about this yet.
+        """decrement() changes the quantity of an item in a database. There is
+           not much important about this yet."""
+        
         sqlstring = "quantity = quantity - " + str(subtract)
         global conn
         global cursor
@@ -459,8 +479,9 @@ class connectTools:
             return False
     
     def increment(add, itemID):
-##increment() changes the quanity of an item in a database. We can use this
-## to do returns on items.
+        """increment() changes the quanity of an item in a database. We can use this
+           to do returns on items."""
+        
         sqlstring = "quantity = quantity + " + str(add)
         global conn
         global cursor
