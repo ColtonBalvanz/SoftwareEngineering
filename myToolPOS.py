@@ -8,6 +8,7 @@ import urllib.parse
 import time
 import xlwt
 from datetime import datetime
+from datetime import date
 from tkinter import *
 import os
 
@@ -194,8 +195,8 @@ class connectTools:
         global cursor
         try:
             cursor.execute(
-            """INSERT INTO inventory (item_id, quantity, category, price, cost, desired_quantity, sale, sale_start, sale_end, sale_price, supplier)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", row)
+            """INSERT INTO inventory (item_id, quantity, category, price, cost, desired_quantity, sale, sale_start, sale_end, sale_price, supplier, item_name)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""", row)
             conn.commit()
             return True
         except:
@@ -398,6 +399,7 @@ class connectTools:
         dailyOperations.write(3,3, (sales_yesterday-profit_yesterday)/100, MONEY_FORMAT)
         report.save(GENERATE_DAILY_REPORT_NAME+ '.xls')
         os.system("start " + GENERATE_DAILY_REPORT_NAME + '.xls')
+
         
 
     def parse_list(alist):

@@ -22,7 +22,7 @@ def cashGUI():
     """Opens cashier GUI"""
     os.system("cashierGUI.py")
 
-def generateReport():
+def generateDailyReport():
     global connected
     if connected == False:
         connected = connectTools.connect()
@@ -46,7 +46,7 @@ modSales.place(relx=.17, rely=.18, anchor="c")
 viewAudits = Button(root,text="View Audits",width=15,height=2,bg="#c2d6d6",
                     command=notImplemented)
 viewAudits.place(relx=.17, rely=.45, anchor="c")
-genDaily = Button(root,text="Generate Daily",command=generateReport,width=15,height=2,bg="#c2d6d6")
+genDaily = Button(root,text="Generate Daily",command=generateDailyReport,width=15,height=2,bg="#c2d6d6")
 genDaily.place(relx=.17, rely=.72, anchor="c")
 cashMode = Button(root,text="Cashier Mode",command=cashGUI,width=10,height=5,bg="#c2d6d6")
 cashMode.place(relx=.5,rely=.314,anchor="c")

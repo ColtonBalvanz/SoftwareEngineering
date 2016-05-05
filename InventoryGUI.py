@@ -78,6 +78,7 @@ def createWindow():
 def modifyItem():
     global inventory
     curItem = inventory.focus()
+    print(inventory.item(curItem))
     window = tk.Toplevel()
     window.title("Modify Item")
     window.resizable(width=FALSE, height=FALSE)
@@ -90,13 +91,41 @@ def addItem():
 
     COLUMN_LABELS = ["Item ID", "Quantity", "Category", "Price", "Cost",
                       "Desired Quantity", "Sale?", "Sale Start Date", "Sale End Date",
-                      "Sale Price", "Supplier"]
+                      "Sale Price", "Supplier", "Item Name"]
 
     def add():
         stuff = list()
+        count = 0
         for column in COLUMN_LABELS:
-            stuff.append(entry.get[column].get())
+            if count==0 or count==1 or count==3 or count==4 or count==5:
+                stuff.append(int(entry[column].get()))
+            elif count==6:
+                if entry[column].get()=="False":
+                    stuff.append(False)
+                elif entry[column].get()=="True":
+                    stuff.append(True)
+                else:
+                    print("You goof!")
+            elif entry[column].get()=="":
+                stuff.append(None)
+            else:
+                stuff.append(entry[column].get())
+            count+=1
         print(stuff)
+        if connectTools.add_item(stuff)==True:
+            window = tk.Toplevel()
+            window.title("Successful!")
+            window.resizable(width=FALSE, height=FALSE)
+            text = Label(window, text="The add was successful!")
+            text.pack()
+        else:
+            window = tk.Toplevel()
+            window.title("Unsuccessful!")
+            window.resizable(width=FALSE, height=FALSE)
+            text = Label(window, text="The add was unsuccessful!")
+            text.pack()
+            
+            
     
     entry = {}
     label = {}
@@ -106,13 +135,13 @@ def addItem():
     window.grid()
     i = 0
     for column in COLUMN_LABELS:
-        lb = Label(window, text=column)
-        lb.grid(row=0, column=i)
-        label[column] = lb
+        labels = Label(window, text=column)
+        labels.grid(row=0, column=i)
+        label[column] = labels
         
-        e = Entry(window, width=15)
-        e.grid(row=1, column=i)
-        entry[column] = e
+        entries = Entry(window, width=15)
+        entries.grid(row=1, column=i)
+        entry[column] = entries
         i += 1
     blank = Label(window, text="")
     blank.grid(row=0, column=len(COLUMN_LABELS))
