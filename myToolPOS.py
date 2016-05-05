@@ -55,6 +55,7 @@ class connectTools:
     salesTax = 0
     inputIDlist = list()
     itemIDs = list()
+
     
     def connect():
         """The connect method opens the initial connection to the server. To
@@ -82,6 +83,7 @@ class connectTools:
         except:
             return False
 
+
     def disconnect():
         """This is called after connect(), and it should not be called before
            connect()."""
@@ -90,10 +92,12 @@ class connectTools:
             conn.close()
         except:
             print("Sorry, I am not even connected right now.")
+
             
     def check_count():
         """Checks if it can overwrite the current sale ID so a new sale can
            take place"""
+
         global cursor
         cursor.execute("""SELECT MAX(sale_id) FROM sales;""")
         current = cursor.fetchone()
@@ -113,6 +117,7 @@ class connectTools:
         else:
             print("Counter looks good already!")
 
+
     def query(table, column):
         """This method allows the user to query which table to access and which
            column in the table. It may be useful, but query_single is more
@@ -123,6 +128,7 @@ class connectTools:
         cursor.execute("""SELECT %(column)s FROM %(table)s""", {"table": AsIs(table), "column": AsIs(column)})
         return cursor.fetchall()
 
+
     def query_single(table, column, args):
         """This is helpful for when we want to look up an item more specifically.
            We can look up the price from a barcode and other related columns
@@ -132,6 +138,7 @@ class connectTools:
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
         return cursor.fetchone()
 
+
     def query_multi(table, column, args):
         """This method was created to return multiple rows from the database. It
            is ideally used to generate reports between different sets of days. It
@@ -140,6 +147,7 @@ class connectTools:
         global cursor
         cursor.execute("""SELECT %(column)s FROM %(table)s WHERE %(args)s;""", {"table": AsIs(table), "column": AsIs(column), "args": AsIs(args)})
         return cursor.fetchall()
+
 
     def modify_single(table, operation, location):
         """modify_single will do the work of subtracting a number of items from a
@@ -155,6 +163,7 @@ class connectTools:
         except:
             print("Sorry, I was unable to modify with that statement")
             return False
+
             
     def add_sale(row):
         """add_sale has the responsibility to add a row in the sales table, and
@@ -193,6 +202,7 @@ class connectTools:
             print("Sorry, I could not add this item")
             return False
 
+
     def newMakeSale(itemID):
         """Occurs when user makes a new sale and also checks if the UPC code
            entered is a valid UPC code"""
@@ -212,9 +222,11 @@ class connectTools:
             window.after(4000, lambda: window.destroy())
             window.geometry('{}x{}'.format(480,60))
 
+
     def voidItem(itemID):
         """This method checks for validity when the user wants to remove an item from their sale.
            And if they input a valid UPC code, it will remove the item"""
+
         global itemList
         item = connectTools.query_single("inventory", "*", "item_id = " + itemID)
         if item != None:
@@ -222,7 +234,6 @@ class connectTools:
                 listItem = tuple([itemID, item[11], item[9]])
             else:
                 listItem = tuple([itemID, item[11], item[3]])
-
             if listItem in itemList:
                 itemList.remove(listItem)
             else:
@@ -243,8 +254,8 @@ class connectTools:
             
     def voidSale():
         """This interacts with our GUI when the user wants to remove their sale"""
-        global itemList
         itemList = list()
+
 
     def endSale():
         """Used when the user clicks Pay Now!"""
@@ -308,6 +319,7 @@ class connectTools:
         receipt.save('Customer_receipt_' + str(ticketID)+'.xls')
         os.system("start Customer_receipt_" + str(ticketID)+ '.xls')
 
+
     def generateWorth():
         """This single method generates the worth of the current inventory. It
            lists out what is currently in the inventory, how many are in stock,
@@ -319,7 +331,6 @@ class connectTools:
         global ALIGN_CENTER
         rowIndex = 3
         records = connectTools.query('inventory', '*')
-
         COLUMN_HEADINGS = [("Item ID"), ("Item Name"),
                            ("Quantity"), ("Cost"), ("Total Cost")]
         report = xlwt.Workbook()
@@ -327,7 +338,6 @@ class connectTools:
         dailyWorth.write_merge(0, 1, 0, 4, GENERATE_WORTH_NAME, BRAND_CELL)
         for x in range(0, len(COLUMN_HEADINGS)):
             dailyWorth.write(2,x, COLUMN_HEADINGS[x], BOLDED_CENTER)
-        
         for row in records:
             itemID = row[0]
             itemName = row[11]
@@ -345,6 +355,7 @@ class connectTools:
             column.width = 256*25
         report.save(GENERATE_WORTH_NAME + '.xls')
         os.system("start " + GENERATE_WORTH_NAME + '.xls')
+
 
     def generateDailyReport():
         """Generate worth is still incomplete. It can generate daily reports from
@@ -365,7 +376,6 @@ class connectTools:
         profit_yesterday = 0
         today = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id >= " + todays_date))
         yesterday = connectTools.parse_list(connectTools.query_multi('sales', '*', "sale_id BETWEEN " + yesterdays_date + " AND " + todays_date))
-        ##print(yesterday)
         COLUMN_HEADINGS = [("Sales Today"), ("Sales Yesterday"),
                            ("Profit Today"), ("Profit Yesterday")]
         report = xlwt.Workbook()
@@ -376,14 +386,12 @@ class connectTools:
             dailyOperations.write(2,x, COLUMN_HEADINGS[x], BOLDED_CENTER)
             column = dailyOperations.col(x)
             column.width = 256*25
-
         for x in range (0, len(today[2])):
             sales_today += (int(today[2][x]))
             profit_today += connectTools.query_single("inventory", "cost", "item_id = " + str(today[1][x]))[0]
         for x in range(0, len(yesterday[2])):
             sales_yesterday +=(int(yesterday[2][x]))
             profit_yesterday += connectTools.query_single("inventory", "cost", "item_id = " + str(yesterday[1][x]))[0]
-            ##print(sales_today)
         dailyOperations.write(3,0, (sales_today/100), MONEY_FORMAT)
         dailyOperations.write(3,1, (sales_yesterday/100), MONEY_FORMAT)
         dailyOperations.write(3,2, (sales_today-profit_today)/100, MONEY_FORMAT)
@@ -429,8 +437,8 @@ class connectTools:
                     else:
                         individual_item += character
         return newList    
-    
 
+    
     def decrement(subtract, itemID):
         """decrement() changes the quantity of an item in a database. There is
            not much important about this yet."""
@@ -448,6 +456,7 @@ class connectTools:
         except:
             print("Sorry, I was unable to modify with that statement")
             return False
+
     
     def increment(add, itemID):
         """increment() changes the quanity of an item in a database. We can use this
@@ -466,21 +475,3 @@ class connectTools:
         except:
             print("Sorry, I was unable to modify with that statement")
             return False
-
-
-
-def main():
-##This probably won't be here for too long. Once we have a GUI we will
-##have a more functional main() to operate out sale system.
-
-    if connectTools.connect()==True:
-        print("The connection was a success!")
-        #connectTools.makeSale()
-        ##connectTools.generateDailyReport()
-        connectTools.disconnect()
-    else:
-        print("Whoops! I can't connect!")
-        exit()
-##This works, I don't know how, but it does.
-if __name__ == '__main__':
-    main()
