@@ -39,6 +39,10 @@ class connectTools:
     global itemNames
     global itemIDs
     global itemPrices
+    global subtotal
+    global salesTax
+    subtotal = 0
+    salesTax = 0
     conn = None
     server_info = None
     url = None
@@ -51,7 +55,6 @@ class connectTools:
     salesTax = 0
     inputIDlist = list()
     itemIDs = list()
-   # itemList = list()
     
     def connect():
         """The connect method opens the initial connection to the server. To
@@ -99,17 +102,14 @@ class connectTools:
             global dateString
             global counter
             dateString = str(time.strftime("%Y%m%d"))
-            #ticketID = dateString + str(counter)
             ticketID = dateString + "000"
             ticketID = int(ticketID) + counter
             if int(ticketID) <= int(current[0]):
                 print("Adjusting the counter...")
                 counter+=1
-    ##              print(ticketID)
                 connectTools.check_count()
             else:
                 print("Counter is now in sync!")
-    ##              print(ticketID)
         else:
             print("Counter looks good already!")
 
@@ -193,59 +193,6 @@ class connectTools:
             print("Sorry, I could not add this item")
             return False
 
-    def makeSale():
-        """The makeSale() method is responsible for producing the sale of a
-           customer. It will also print out a physical receipt the customer can
-           take with them."""
-        global counter
-        global dateString
-        global itemNames
-        global itemPrices
-        global inputIDlist
-        global grandTotal
-        global salesTax
-        global subTotal
-        counter += 1
-        receiptString = ""
-        itemNames = list()
-        itemPrices = list()
-        subTotal = 0
-        salesTax = 0
-        inputIDlist = list()
-        while True:
-            inputID = input("Scan item or input item ID. Hit enter with no item ID to end sale. ")
-            if inputID == "":
-                break
-            else:
-                item = connectTools.query_single("inventory", "*", "item_id = " + inputID)
-                if item != None:
-                    inputIDlist.append(inputID)
-                    itemNames.append(item[11])
-                    if item[6] == True:
-                        global grandTotal
-                        itemPrices.append(item[9])
-                        subTotal += item[9]
-                    else:
-                        global grandTotal
-                        itemPrices.append(item[3])
-                        subTotal+= item[3]
-                else:
-                    print("Item was not found.")
-            salesTax = round((subTotal*7)/100)
-        sale = list([int(ticketID), inputIDlist, itemPrices])
-        if connectTools.add_sale(sale)==True:
-            print("I added the sale!")
-        else:
-            print("Sorry, I could not add this item")
-        for itemID in inputIDlist:
-            connectTools.decrement(1, itemID)
-        print(ticketID)
-        print(itemNames)
-        print(itemPrices)
-        print("Sub total: " + str(subTotal))
-        print("Sales tax: " + str(salesTax))
-        connectTools.generateReceipt(itemNames, itemPrices, subTotal, salesTax)
-
     def newMakeSale(itemID):
         """Occurs when user makes a new sale and also checks if the UPC code
            entered is a valid UPC code"""
@@ -293,15 +240,6 @@ class connectTools:
             window.after(4000, lambda: window.destroy())
             window.geometry('{}x{}'.format(480,60))
             
-##        if listItem in itemList:
-##            itemList.remove(listItem)
-##        else:
-##            window = tk.Toplevel()
-##            window.resizable(width=FALSE,height=FALSE)
-##            label = Label(window,text="The UPC code you entered was not found in the cart!",font="Helvetica 13 bold")
-##            label.pack(side="top",fill="both",padx=10,pady=10)
-##            window.after(3000, lambda: window.destroy())
-##            window.geometry('{}x{}'.format(450,80))
             
     def voidSale():
         """This interacts with our GUI when the user wants to remove their sale"""
@@ -325,6 +263,10 @@ class connectTools:
             window.geometry('{}x{}'.format(480,60))
         for itemID in itemIDs:
             connectTools.decrement(1, itemID)
+        for price in itemPrices:
+            subtotal += price
+        salesTax = round((subtotal*.07)/100)
+        connectTools.generateReceipt(itemNames, itemPrices, subtotal, salesTax)
         window = tk.Toplevel()
         window.resizable(width=FALSE,height=FALSE)
         label = Label(window,text="Sale completed!",font="Helvetica 13 bold")
