@@ -52,8 +52,6 @@ class connectTools:
     ticketID = None
     itemNames = list()
     itemPrices = list()
-    subTotal = 0
-    salesTax = 0
     inputIDlist = list()
     itemIDs = list()
 
@@ -260,6 +258,8 @@ class connectTools:
 
     def endSale():
         """Used when the user clicks Pay Now!"""
+        global subtotal
+        global salesTax
         for item in itemList:
             itemIDs.append(item[0])
             itemNames.append(item[1])
@@ -277,7 +277,7 @@ class connectTools:
             connectTools.decrement(1, itemID)
         for price in itemPrices:
             subtotal += price
-        salesTax = round((subtotal*.07)/100)
+        salesTax = subtotal*.07
         connectTools.generateReceipt(itemNames, itemPrices, subtotal, salesTax)
         window = tk.Toplevel()
         window.resizable(width=FALSE,height=FALSE)
